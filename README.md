@@ -1,6 +1,6 @@
 # DeepSeek-V4.1-Flash on four NVIDIA DGX Sparks (vLLM, TP4)
 
-**Status (2026-09-10, ~6 AM ET): not serving yet.** Boots 3 and 4 died. Both root causes are identified and reproduced, and boot 5 is staged. Numbers land here as they are measured. Nothing on this page is a projection.
+**Status (2026-09-10, ~7 AM ET): serving.** Boot 6 is up: text-only, no speculation, 300K context. The DSpark boot is next. Numbers land here as they are measured. Nothing on this page is a projection.
 
 `deepseek-ai/DeepSeek-V4.1-Flash` dropped 2026-09-10 ~2 AM ET.
 - 552B-backbone MoE (769B counting the Engram tables), 16B active decode / 8B prefill, 1M context.
@@ -28,10 +28,11 @@ This repo is the recipe that makes it fit:
 | 2 | overlay2 + SWA backend override | Died at KV init: `No common block size for 32`. |
 | 3 | overlay3 (FlashInfer 0.7.0rc1) + SM12x page-size patches | Wedged all 4 nodes during profiling. A runtime JIT compile of `mxfp8_gemm_cutlass_sm120` exhausted host memory, and the watchdogs reset the nodes. [docs](docs/boot3-wedge-and-engram-offset.md) |
 | 4 | overlay5 (kernels prebuilt) + `MAX_JOBS=2` | No runtime JIT; KV 2,026,695 tokens. Died at KV init: `No common block size for 64`. vLLM picks min(`[128, 64]`) = 64, and the V4 indexer backend takes only 128 on SM12x. [docs](docs/boot4-block-size.md) |
-| 5 (staged) | + `--block-size 128` | |
-| 6 (staged) | + Engram rank-offset fix | |
-| 7 (staged) | + DSpark | |
-| 8 (staged) | + vision | |
+| 5 | + `--block-size 128`, Engram rank-offset fix, 300K ctx | KV 2,346,690 tokens; every rank now reads its own Engram rows. Died in decode warmup: DeepGEMM paged MQA logits takes 32 or 64 states per block, and the ratio-1 indexer cache had 128. [docs](docs/boot5-indexer-pages.md) |
+| 6 | + SM12x indexer pages of 64 states | **Serving** (text-only, no speculation). KV 2,318,801 tokens (10.61 GiB, 7.73x at 300K). |
+| 7 (next) | + DSpark k=5 | |
+| 8 (planned) | DSpark at 1M max context (proof boot) | |
+| 9 (planned) | DSpark, 300K, left running | |
 
 Fleet: Reddie (head; model on local NVMe, exported over NFS), Asusi, Bluey and Spark4 (workers; read the weights over NFS). ConnectX-7 RoCE fabric 192.168.192.0/24.
 

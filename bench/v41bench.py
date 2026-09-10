@@ -31,16 +31,16 @@ SUMMARY_PASSAGE = (
     "solar farms, and least valuable when asked to cover long, rare shortages on their own."
 )
 CATEGORIES = [
-    ("coding", "Write a Python function merge_intervals(intervals) that merges overlapping intervals and returns them sorted. Include a docstring and three example calls with their expected output.", 400),
-    ("json", "Return only a JSON object describing a fictional bookstore with keys: name (string), city (string), founded (integer year), genres (array of 5 strings), staff (array of 3 objects, each with name and role). No prose.", 300),
-    ("narrative", "Write a 250-word short story about a lighthouse keeper who finds a message in a bottle. Use vivid sensory detail.", 400),
-    ("prose", "Explain in about 250 words how a refrigerator keeps food cold, for a curious 12-year-old.", 400),
-    ("math", "A train leaves at 9:40. It travels 212 km at 80 km/h, stops for 12 minutes, then travels 95 km at 60 km/h. At what time does it arrive? Show the steps briefly, then give the final time.", 300),
-    ("reasoning", "Ana, Ben and Cal each own exactly one pet: a cat, a dog, or a fish. Ana does not own the dog. Ben owns neither the cat nor the fish. Who owns which pet? Explain the deduction step by step.", 300),
-    ("summary", "Summarize the following passage in exactly three bullet points.\n\n" + SUMMARY_PASSAGE, 200),
-    ("format", "Convert this list into a Markdown table with columns Item, Qty, Price, Total (Qty x Price), and add a final row with the grand total: apples 3 @ 0.50; bread 1 @ 2.25; milk 2 @ 1.10; eggs 12 @ 0.25.", 250),
+    ("coding", "Write a Python function merge_intervals(intervals) that merges overlapping intervals and returns them sorted. Include a one-line docstring and two example calls.", 200),
+    ("json", "Return only a JSON object describing a fictional bookstore with keys: name (string), city (string), founded (integer year), genres (array of 5 strings), staff (array of 3 objects, each with name and role). No prose.", 200),
+    ("narrative", "Write a 120-word short story about a lighthouse keeper who finds a message in a bottle. Use vivid sensory detail.", 200),
+    ("prose", "Explain in about 120 words how a refrigerator keeps food cold, for a curious 12-year-old.", 200),
+    ("math", "A train leaves at 9:40. It travels 212 km at 80 km/h, stops for 12 minutes, then travels 95 km at 60 km/h. At what time does it arrive? Show the steps briefly, then give the final time.", 200),
+    ("reasoning", "Ana, Ben and Cal each own exactly one pet: a cat, a dog, or a fish. Ana does not own the dog. Ben owns neither the cat nor the fish. Who owns which pet? Explain the deduction step by step.", 200),
+    ("summary", "Summarize the following passage in exactly three bullet points.\n\n" + SUMMARY_PASSAGE, 150),
+    ("format", "Convert this list into a Markdown table with columns Item, Qty, Price, Total (Qty x Price), and add a final row with the grand total: apples 3 @ 0.50; bread 1 @ 2.25; milk 2 @ 1.10; eggs 12 @ 0.25.", 200),
 ]
-CEILING = ("ceiling_count", "Count from 1 to 300, comma separated, nothing else.", 600)
+CEILING = ("ceiling_count", "Count from 1 to 80, comma separated, nothing else.", 256)
 FILLER_WORDS = ("amber basin cedar delta ember fjord garnet harbor iris juniper kestrel lumen meadow nimbus orchid "
                 "pylon quartz raven sierra tundra umber vessel willow xenon yarrow zephyr").split()
 
