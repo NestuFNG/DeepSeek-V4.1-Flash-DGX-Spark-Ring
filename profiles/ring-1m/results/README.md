@@ -58,3 +58,7 @@ An additional single C1 batch and single C6 batch use the upstream `merge_interv
 - Selected package/source/launch hashes agreed on all nodes, but two Docker image IDs were present. Byte-identical images are not asserted.
 - The generalized public scripts are syntax/consistency checked; the live tests used the same kernels and serving settings with local paths. A second clean deployment is not yet validated.
 - No multi-day soak, reboot recovery, full 256K output generation, or universal agent-client compatibility test is claimed.
+
+## Additional short-concurrency and prefix-cache measurements
+
+The homepage now includes the separate eight-slot candidate measurements, with actual input/output lengths, per-stream decode, batch throughput, strict simultaneous-decode windows and the 33K prefix replay. These do not establish eight resident 500K contexts. See [short C1/C6/C8 raw evidence](short-concurrency-c1-c6-c8.json), [33K prefix replay](prefix-cache-33k.json), and [the homepage tables](../../../README.md). All use ON/max, temperature1/top_p .95; no OFF test was added.

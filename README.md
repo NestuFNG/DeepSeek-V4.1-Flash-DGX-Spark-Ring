@@ -1,47 +1,109 @@
-# DeepSeek V4.1 Flash on four DGX Sparks — switchless Ring
+# DeepSeek V4.1 Flash · 四台 DGX Spark Ring
 
-[中文](profiles/ring-1m/README.zh-CN.md) · [Deploy](profiles/ring-1m/README.md) · [Measured results](profiles/ring-1m/results/README.md) · [Attribution](NOTICE.md)
+**1M 单请求上下文 · FP8 KV · max 思考 · 多并发实测**
 
-A community deployment profile for **four 128 GB DGX Sparks in a physical 200G Ring**, serving the full DeepSeek V4.1 Flash checkpoint with vLLM TP4, SSD Engram and DSpark.
+[部署指南（中文）](profiles/ring-1m/README.zh-CN.md) · [Deployment](profiles/ring-1m/README.md) · [完整结果与原始数据](profiles/ring-1m/results/README.md) · [上游与授权](NOTICE.md)
 
-This is a fork of [Tech2Wild / Kai's work](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark). Their patches, benchmarks and Git history are retained; [their original README](UPSTREAM_README.md) describes their system. **Our configuration and measurements live under `profiles/ring-1m/`.**
+四台 128GB DGX Spark，以物理 200G Ring 运行官方完整 DeepSeek V4.1 Flash、vLLM TP4、各节点本地 NVMe Engram 和 DSpark。项目基于 [Tech2Wild / Kai 的工作](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark)，保留上游代码、历史和[原始说明](UPSTREAM_README.md)。本项目的配置、补丁与测试位于 `profiles/ring-1m/`。
 
-## What this profile contributes
+**数据快照：2026-09-11。** 公开部署脚本以已验收的六路配置为基线；八路候选的已完成短测单独列出。八路 500K 和多轮 Agent 验收尚未完成，相关位置保留待测状态。
 
-- **1,048,576-token context limit**, six scheduled requests, thinking **ON / max** by default.
-- **16 GiB KV per node**, with **4,909,644 logical token slots** reported for the whole TP4 instance. Current cache is `fp8_ds_mla` and FP8 indexer.
-- A DeepSeek-specific indexer workspace bound saving a theoretical **4.38 GiB per node**, without changing KV arithmetic or precision.
-- Full-file, global-row Engram ownership retained while porting upstream graph prestaging to the pinned official vLLM image.
-- Reproducible max-thinking checks for tools, generated image recognition, six independent coding requests and long-context retrieval.
-- Pinned runtime sources, patch hashes, checkpoint shard hashes, parameterized configuration and explicit benchmark accounting.
+## 先看配置与验收范围
 
-## Current evidence
+| 项目 | 已验证内容 |
+|---|---|
+| 单请求上下文上限 | **1,048,576 tokens**；实际检索测试最长输入 **982,126 tokens** |
+| KV 分配 | 每节点 **16 GiB**，整套 TP4 报告 **4,909,644 个逻辑 token 槽位** |
+| KV 精度 | `fp8_ds_mla` + FP8 indexer；NoPE FP8、RoPE BF16，未启用 FP4 KV |
+| 思考与采样 | 本页所有本项目测试均为 **thinking ON / effort max，temperature=1，top_p=0.95** |
+| 并发 | 六路基线完成；八路短请求完成，八路各约 500K 的长负载待完成 |
+| 工具 | 已完成实际“查记录 → 乘法工具 → 校验最终答案”往返 |
+| 图片 | 默认 max 思考下通过一张合成图片的颜色与形状识别；配置最多 4 张，未声称四图验收 |
+| 内存改进 | 限制 indexer 临时工作区，六路配置理论节省 **4.38 GiB/节点**，不改变 KV 计算精度 |
 
-**All four long-input retrieval cases passed.** See [the full table](profiles/ring-1m/results/README.md).
+**491 万槽位是整个模型实例的逻辑容量。** 单请求能配置 1M，不等于六路或八路各 1M 能同时驻留；总容量约为 4.68 个满 1M 上下文。
 
-### 实测速度 / Measured prefill and decode
+## 多路生成：把整批、单路和满并发分开看
 
-**Thinking ON · effort max · temperature 1.0 · top_p 0.95 · FP8 KV.** The following are single-request long-input retrieval measurements. Decode includes thinking tokens and is measured after the first token; prefill comes from server timing counters. Output allowances are not actual generated output lengths.
+单位均为 token/s，包含思考 token。TTFT 为各请求首个生成 token 的平均等待时间。**单路 decode 均值**是每条流在首 token 之后的速度均值；**整批吞吐**是所有输出 token / 从同时发出到最后一条完成的时间；**满并发生成**来自服务端计数器在所有请求同时生成区间内的增量。三个数字不能互相替代。
 
-| 实际输入 / Input tokens | 实际输出 / Output tokens | 输出预算 / Output allowance | 首 token / TTFT (s) | Prefill (token/s) | Decode (token/s) | 验收 / Check |
+| 配置 | 工况 | 并发 | 每路实际输入 | 每路实际输出 | 平均 TTFT 秒 | 单路 decode 均值 | 整批吞吐 | 满并发生成 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 基线 B10 | 同题代码 | 1 | 62 | 543 | 0.431 | 60.57 | **57.88** | — |
+| 基线 B10 | 同题代码 | 6 | 62 | 557–992 | 0.750 | 23.78 | **118.82** | 135.06 |
+| 基线 B10 | 六种不同代码任务 | 6 | 62–66 | 992–5054 | 1.611 | 21.47 | **75.22** | 100.50 |
+| 八路候选 B11 | 同题代码 | 1 | 62 | 672 | 0.354 | 55.84 | **54.11** | 56.38 |
+| 八路候选 B11 | 同题代码 | 6 | 62 | 469–696 | 0.762 | 22.69 | **118.69** | 130.41 |
+| 八路候选 B11 | 同题代码 | 8 | 62 | 368–690 | 0.863 | 19.49 | **123.86** | 141.28 |
+
+B10 输出额度为每路 262,144；B11 为每路 32,768。额度包含思考，实际输出见表。每个单元格目前只有一批，尚未建立稳定的统计分布；这些短输入成绩不代表 500K 上下文速度。B11 满并发窗口要求相邻两个采样点是相同的一组请求且均已开始生成。B10 使用已发布的连续六活跃窗口算法。
+
+数据：[B10 同题 C1/C6](profiles/ring-1m/results/public-prompt-max.json) · [B10 六种代码任务](profiles/ring-1m/results/max-concurrency6.json) · [B11 C1/C6/C8 与采样记录](profiles/ring-1m/results/short-concurrency-c1-c6-c8.json)。
+
+### 较长输出：六种代码任务的尾段影响
+
+| 同批任务 | 实际输出 tokens | 其中思考 tokens | 完成耗时 秒 | 该请求全程 decode |
+|---|---:|---:|---:|---:|
+| 区间合并 | 1,289 | 967 | 66.81 | 19.39 |
+| 二分查找 | 992 | 724 | 52.43 | 19.60 |
+| 单词统计 | 5,054 | 4,802 | 180.15 | 28.34 |
+| 累计和生成器 | 1,208 | 992 | 69.97 | 17.72 |
+| 单层列表展开 | 1,082 | 779 | 63.10 | 17.65 |
+| 回文判断 | 3,926 | 3,587 | 152.00 | 26.14 |
+
+这一批共生成 **13,551 tokens**，其中 **87.5%** 是思考，整批 **180.16 秒**。约 **109 秒**只有 1–2 条请求仍在运行，所以整批 75.22 低于六路同时活跃时的 100.50。表中的单路速度包含其它请求陆续结束后的加速尾段，不能乘以 6 当作持续满载吞吐。[计算与原始采样](profiles/ring-1m/results/concurrency-analysis.json)。
+
+## 长上下文：prefill 与 decode
+
+均为单路、独立缓存盐的首次请求；在输入约 12%、51%、89% 位置放置三个精确标记并检查返回值。Prefill 使用服务端计时，decode 使用客户端首 token 后的实际生成时间。
+
+| 实际输入 tokens | 实际输出 tokens | 输出额度 | TTFT 秒 | Prefill token/s | Decode token/s | 检索结果 |
+|---:|---:|---:|---:|---:|---:|---|
+| 65,254 | 204 | 262,144 | 59.17 | **1105.77** | **64.30** | 3/3 标记正确 |
+| 261,832 | 199 | 262,144 | 248.87 | **1054.47** | **66.59** | 3/3 标记正确 |
+| 784,046 | 201 | 262,144 | 912.30 | **861.01** | **63.77** | 3/3 标记正确 |
+| 982,126 | 160 | 65,536 | 1214.02 | **810.36** | **60.54** | 3/3 标记正确 |
+
+这些是检索验收，输出较短；不等同于几十万 token 的长篇生成，也不代表通用长上下文质量评测。[逐例原始结果](profiles/ring-1m/results/long-validation-results.json)。
+
+## 缓存复用：重复输入的等待时间
+
+以下两次请求使用完全相同的 33,114-token 前缀和缓存盐，均启用 max 思考。缓存减少 prefill 工作，decode 速度仍须单独测量。
+
+| 请求 | 输入 tokens | 实际缓存命中 tokens | 命中率 | TTFT 秒 | 单路 decode | 检索结果 |
 |---|---:|---:|---:|---:|---:|---|
-| 65,254 | 204 | 262,144 | 59.17 | 1105.77 | 64.30 | PASS |
-| 261,832 | 199 | 262,144 | 248.87 | 1054.47 | 66.59 | PASS |
-| 784,046 | 201 | 262,144 | 912.30 | 861.01 | 63.77 | PASS |
-| 982,126 | 160 | 65,536 | 1214.02 | 810.36 | 60.54 | PASS |
+| 首次请求 / cold | 33,114 | 0 | 0.00% | **29.944** | 71.35 | 3/3 标记正确 |
+| 相同前缀重放 / cached | 33,114 | 33,024 | 99.73% | **0.451** | 71.33 | 3/3 标记正确 |
 
-### 六路吞吐 / Six-request throughput
+[完整计数器与返回值](profiles/ring-1m/results/prefix-cache-33k.json)。同一候选配置也发现某些长度的前缀重放未命中；缓存边界修正在实机验收，尚未作为已完成改进发布。不能根据这一组成功案例推断所有多轮工具会话都能命中。
 
-| 测量口径 / Measurement | Output token/s |
-|---|---:|
-| 整批平均，含最后少数任务收尾 / Whole draining batch | **75.22** |
-| 六路同时生成的完整采样区间 / Continuous six-active interval | **100.50** |
+## 正在补齐的真实 Agent 工况
 
-Six mixed coding requests produced **13,551 output tokens** at **75.22 token/s** over the entire draining batch. The measured interval with all six active produced **100.50 token/s**. These include thinking tokens and are not directly comparable to upstream's OFF/temperature-0 benchmarks. We make no throughput-superiority claim.
+| 工况 | 上下文与负载 | 当前状态 |
+|---|---|---|
+| 八路独立会话 | 每路约 512K 输入，总输入约 409 万；独立前缀 | 待完成，不填推算速度 |
+| 八路热缓存工具 Agent | 沿用各自长历史，实际查记录、计算、校验回答 | 待完成 |
+| 八路长代码输出 | 500K 历史上生成工具模块和测试代码 | 待完成 |
+| 多子 Agent | 八个子 Agent 共享父上下文、并行工具往返，再由父任务汇总 | 待完成 |
+| 并发扫描与参数对照 | 增补 C2/C4、多种任务、重复批次；比较 DSpark 草稿长度与 prefill 调度 | 待完成 |
 
-Additional upstream coding-prompt check, still **ON/max**: C1 batch **57.88 token/s**; C6 batch **118.82 token/s**, with **135.06 token/s** during the continuous six-active interval. This is one batch per concurrency, with different thinking/sampling/output lengths from upstream; see [conditions and raw results](profiles/ring-1m/results/README.md#same-coding-prompt-still-onmax).
+长测将同时报告实际上下文、缓存命中、等待/抢占、TTFT、同时生成区间、实际输出与最低内存余量；已接受八个请求不自动算作八个 500K 上下文同时生成。
 
-**Six scheduled requests do not mean six full 1M contexts fit at once.** The logical pool holds about 4.68 × the configured maximum context. Long tests are sequential retrieval checks; output budgets are not measured generated lengths. The current profile keeps FP8 and does not include experimental FP4 kernels.
+## 与上游比较：差距仍需优化
+
+核对上游提交 [`ca662ac`](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/tree/ca662ac35193c69ace9cee37f13a94abf2eff0fc)：上游 boot10 的代码 C6 整批 **225.5 token/s**、八类任务 C6 平均 **131.86**。我们的同题 max 思考 C6 整批为 **118.82**，目前不声称多路吞吐领先。
+
+| 比较条件 | 上游 boot10 | 本项目已完成测量 |
+|---|---|---|
+| 思考与采样 | OFF，temperature 0 | ON/max，temperature 1，top_p .95 |
+| 配置上下文上限 | 300K | 1,048,576 |
+| 逻辑 KV 池 | 1,070,168 | 4,909,644 |
+| 同题代码 C6 整批 | 225.5 token/s | 118.82 token/s |
+| 输出额度 | 150–256 | 32,768 或 262,144；实际输出另列 |
+
+条件差异限制了直接归因，不能据此认定全部差距来自思考模式。下一步测量每步接受 token 数、推测解码耗时、满并发吞吐及排队尾段，并在相同 max 思考负载下做配置对照。缓存检查与 decode 优化分别记录。[上游数据与方法](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/blob/ca662ac35193c69ace9cee37f13a94abf2eff0fc/results/boot10/report.md)。
+
+## 部署与复现
 
 ```mermaid
 flowchart LR
@@ -51,10 +113,8 @@ flowchart LR
   D --- A
 ```
 
-Each node keeps weights and Engram on local NVMe. A separate management network handles SSH and rendezvous. See the [deployment guide](profiles/ring-1m/README.md) before choosing interface names or launching containers.
+每节点本地 NVMe 保存权重和 Engram，管理网络承担管理连接与进程会合。按[中文部署指南](profiles/ring-1m/README.zh-CN.md)或[英文指南](profiles/ring-1m/README.md)配置自己的接口与路径。公开脚本已做语法、源码一致性和配置检查，尚未声称第二套独立设备从零复现成功。
 
-## License
-
-MIT for the original repository and our recipe additions; modified vLLM files keep Apache-2.0. NVIDIA and downloaded dependencies retain their licenses. See [NOTICE.md](NOTICE.md). No weights, container images, credentials or private deployment logs are published. This project is not affiliated with or endorsed by DeepSeek, NVIDIA, vLLM or FlashInfer.
+本项目保留 MIT 仓库许可；修改的 vLLM 文件保留 Apache-2.0，依赖及模型遵循各自许可。[来源说明](NOTICE.md) · [发布隐私检查](PRIVACY-REVIEW.md)。不发布权重、镜像、凭据或私人机器日志。项目与 DeepSeek、NVIDIA、vLLM、FlashInfer 无官方隶属关系。
 
 **开源万岁！**
