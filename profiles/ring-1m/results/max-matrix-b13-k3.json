@@ -1,0 +1,3044 @@
+{
+  "measurement_date": "2026-09-11 Asia/Shanghai",
+  "scope": "Four unchanged upstream task texts, five concurrency levels, two batches per cell, fixed randomized order, after an excluded warmup. Short input/output measurements; not 500K-context measurements.",
+  "configuration": {
+    "upstream_commit": "ca662ac35193c69ace9cee37f13a94abf2eff0fc",
+    "prompts_sha256": "f8106746dc729d287d3509376d683719862b13f3657847e86153856be6c80bb3",
+    "thinking": "ON/max",
+    "temperature": 1,
+    "top_p": 0.95,
+    "max_tokens": 32768,
+    "boot": 13,
+    "k": 3,
+    "max_model_len": 1048576,
+    "kv_GiB_per_rank": 16,
+    "kv_dtype": "fp8",
+    "warmup_excluded": true
+  },
+  "max_num_seqs": 8,
+  "logical_kv_token_capacity": 4909644,
+  "prefill_chunk_tokens": 4096,
+  "prompts": {
+    "coding": "Write a Python function merge_intervals(intervals) that merges overlapping intervals and returns them sorted. Include a one-line docstring and two example calls.",
+    "json": "Return only a JSON object describing a fictional bookstore with keys: name (string), city (string), founded (integer year), genres (array of 5 strings), staff (array of 3 objects, each with name and role). No prose.",
+    "prose": "Explain in about 120 words how a refrigerator keeps food cold, for a curious 12-year-old.",
+    "math": "A train leaves at 9:40. It travels 212 km at 80 km/h, stops for 12 minutes, then travels 95 km at 60 km/h. At what time does it arrive? Show the steps briefly, then give the final time."
+  },
+  "complete": true,
+  "all_automatic_checks_passed": true,
+  "validation_scope": {
+    "coding": "Python syntax and merge_intervals definition; no generated code executed.",
+    "json": "Requested exact field names, types and list sizes.",
+    "math": "Expected arrival time14:06 present; not a full proof check.",
+    "prose": "Nonempty naturally completed answer with reasoning; prose meaning not automatically graded."
+  },
+  "cells": [
+    {
+      "category": "coding",
+      "concurrency": 6,
+      "repeat": 0,
+      "batch_output_tps": 115.22392315474607,
+      "elapsed_seconds": 35.71306971099693,
+      "completion_tokens": 4115,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        532,
+        887,
+        800,
+        600,
+        727,
+        569
+      ],
+      "ttft_seconds": [
+        0.886143551004352,
+        0.8868696360004833,
+        0.3663971619971562,
+        0.8865103700081818,
+        0.8872280869982205,
+        0.8879835970001295
+      ],
+      "per_stream_decode_tps": [
+        22.073756417374,
+        25.459690774348033,
+        23.87575880221844,
+        22.304735961107195,
+        22.119904461201607,
+        20.814052345420475
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 22.33625054359436,
+        "output_tokens": 2897.0,
+        "output_tps": 129.69947638910273,
+        "request_drafts": 858.0,
+        "accepted_draft_tokens": 2039.0,
+        "accepted_plus_bonus_per_draft": 3.3764568764568765,
+        "approx_iteration_ms_from_request_draft_counter": 156.1975562489116,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3868312757201644,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 372.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1215.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 2900.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 4,
+      "repeat": 0,
+      "batch_output_tps": 79.02921199431255,
+      "elapsed_seconds": 8.591759716000524,
+      "completion_tokens": 679,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        179,
+        250,
+        141,
+        109
+      ],
+      "ttft_seconds": [
+        0.839623626001412,
+        0.8391629020043183,
+        0.3803223240101943,
+        0.840118205989711
+      ],
+      "per_stream_decode_tps": [
+        27.53583636030376,
+        32.216439065521435,
+        25.303955825749025,
+        21.286708721951587
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0232226848602295,
+        "output_tokens": 202.0,
+        "output_tps": 99.84071526657225,
+        "request_drafts": 64.0,
+        "accepted_draft_tokens": 138.0,
+        "accepted_plus_bonus_per_draft": 3.15625,
+        "approx_iteration_ms_from_request_draft_counter": 126.45141780376434,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.1682242990654204,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 320.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 214.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 464.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 8,
+      "repeat": 0,
+      "batch_output_tps": 113.44487302292607,
+      "elapsed_seconds": 53.34749679500237,
+      "completion_tokens": 6052,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51,
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        704,
+        721,
+        647,
+        682,
+        667,
+        1174,
+        768,
+        689
+      ],
+      "ttft_seconds": [
+        0.8590776049968554,
+        0.856344257001183,
+        0.8570519899949431,
+        0.8570353660034016,
+        0.37396813700615894,
+        0.8596804569970118,
+        0.8598298830038402,
+        0.859660520000034
+      ],
+      "per_stream_decode_tps": [
+        16.313053430973095,
+        16.1112406597546,
+        16.32856416813942,
+        16.91747443948641,
+        16.552175231650885,
+        22.359486716809226,
+        17.11893613465012,
+        16.398847114110804
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 36.55461931228638,
+        "output_tokens": 4569.0,
+        "output_tps": 124.99104315564061,
+        "request_drafts": 1672.0,
+        "accepted_draft_tokens": 2897.0,
+        "accepted_plus_bonus_per_draft": 2.7326555023923444,
+        "approx_iteration_ms_from_request_draft_counter": 174.9024847477817,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.8573452999527635,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 408.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 2117.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 3932.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 2,
+      "repeat": 0,
+      "batch_output_tps": 72.97279123435719,
+      "elapsed_seconds": 8.112612796991016,
+      "completion_tokens": 592,
+      "input_tokens": [
+        85,
+        85
+      ],
+      "output_tokens": [
+        265,
+        327
+      ],
+      "ttft_seconds": [
+        0.3336858450056752,
+        0.67674679501215
+      ],
+      "per_stream_decode_tps": [
+        39.814307013159564,
+        44.046713032460616
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.043952941894531,
+        "output_tokens": 313.0,
+        "output_tps": 77.39951589381359,
+        "request_drafts": 102.0,
+        "accepted_draft_tokens": 211.0,
+        "accepted_plus_bonus_per_draft": 3.0686274509803924,
+        "approx_iteration_ms_from_request_draft_counter": 79.29319493910846,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.2888888888888888,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 170.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 180.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 412.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 1,
+      "repeat": 0,
+      "batch_output_tps": 52.43559506749223,
+      "elapsed_seconds": 6.827423233000445,
+      "completion_tokens": 358,
+      "input_tokens": [
+        85
+      ],
+      "output_tokens": [
+        358
+      ],
+      "ttft_seconds": [
+        0.3088093449914595
+      ],
+      "per_stream_decode_tps": [
+        54.94310663542416
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.03930139541626,
+        "output_tokens": 212.0,
+        "output_tps": 52.48432321504271,
+        "request_drafts": 66.0,
+        "accepted_draft_tokens": 146.0,
+        "accepted_plus_bonus_per_draft": 3.212121212121212,
+        "approx_iteration_ms_from_request_draft_counter": 61.20153629418576,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.314814814814815,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 85.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 108.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 250.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 4,
+      "repeat": 0,
+      "batch_output_tps": 91.72338642670461,
+      "elapsed_seconds": 30.363030722000985,
+      "completion_tokens": 2785,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        507,
+        582,
+        1040,
+        656
+      ],
+      "ttft_seconds": [
+        0.7496965989994351,
+        0.31140058700111695,
+        0.7493927730101859,
+        0.7505310050037224
+      ],
+      "per_stream_decode_tps": [
+        28.7149156754995,
+        28.402054490088112,
+        35.11517146449641,
+        29.36020572848484
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 16.174331426620483,
+        "output_tokens": 1812.0,
+        "output_tps": 112.029360114244,
+        "request_drafts": 524.0,
+        "accepted_draft_tokens": 1288.0,
+        "accepted_plus_bonus_per_draft": 3.4580152671755724,
+        "approx_iteration_ms_from_request_draft_counter": 123.46817882916399,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.414723926380368,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 248.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 815.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1968.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 1,
+      "repeat": 0,
+      "batch_output_tps": 50.26271042917486,
+      "elapsed_seconds": 15.06086706300266,
+      "completion_tokens": 757,
+      "input_tokens": [
+        62
+      ],
+      "output_tokens": [
+        757
+      ],
+      "ttft_seconds": [
+        0.2708503780013416
+      ],
+      "per_stream_decode_tps": [
+        51.18546038791052
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 12.14544939994812,
+        "output_tokens": 640.0,
+        "output_tps": 52.69463310289151,
+        "request_drafts": 200.0,
+        "accepted_draft_tokens": 440.0,
+        "accepted_plus_bonus_per_draft": 3.2,
+        "approx_iteration_ms_from_request_draft_counter": 60.7272469997406,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.12396694214876,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 62.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 242.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 514.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 6,
+      "repeat": 0,
+      "batch_output_tps": 99.3968176323719,
+      "elapsed_seconds": 45.0819262300065,
+      "completion_tokens": 4481,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        656,
+        1157,
+        681,
+        712,
+        628,
+        647
+      ],
+      "ttft_seconds": [
+        0.3361762540007476,
+        0.7470099030033452,
+        0.7412050800048746,
+        0.7411396389943548,
+        0.7460917040007189,
+        0.7474182409932837
+      ],
+      "per_stream_decode_tps": [
+        20.056078946250093,
+        26.09463425663356,
+        19.589916732648494,
+        19.62637434356491,
+        19.6317551110465,
+        19.19813320842557
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 30.35581660270691,
+        "output_tokens": 3432.0,
+        "output_tps": 113.05905701426458,
+        "request_drafts": 1218.0,
+        "accepted_draft_tokens": 2214.0,
+        "accepted_plus_bonus_per_draft": 2.817733990147783,
+        "approx_iteration_ms_from_request_draft_counter": 149.53604237786655,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.915364583333333,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 306.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1536.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 2942.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 8,
+      "repeat": 0,
+      "batch_output_tps": 147.99397264757985,
+      "elapsed_seconds": 15.68982816299831,
+      "completion_tokens": 2322,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        326,
+        291,
+        352,
+        243,
+        280,
+        250,
+        298,
+        282
+      ],
+      "ttft_seconds": [
+        1.006651518997387,
+        1.0062998520006659,
+        1.005408246011939,
+        1.0042453429923626,
+        1.0062694039952476,
+        1.0048886430013226,
+        1.0053277980041457,
+        0.37642957200296223
+      ],
+      "per_stream_decode_tps": [
+        23.47090578645127,
+        21.712472660011766,
+        23.951795835811645,
+        21.514533296914273,
+        22.234495011738684,
+        21.809922342774566,
+        21.876737465748352,
+        20.65891191521467
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 10.124999761581421,
+        "output_tokens": 1746.0,
+        "output_tps": 172.4444485050825,
+        "request_drafts": 536.0,
+        "accepted_draft_tokens": 1210.0,
+        "accepted_plus_bonus_per_draft": 3.2574626865671643,
+        "approx_iteration_ms_from_request_draft_counter": 151.11939942658836,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.2750352609308884,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 680.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 709.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1613.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 4,
+      "repeat": 0,
+      "batch_output_tps": 111.12768150483616,
+      "elapsed_seconds": 10.22247548600717,
+      "completion_tokens": 1136,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        307,
+        289,
+        265,
+        275
+      ],
+      "ttft_seconds": [
+        0.34939792500517797,
+        0.7721252979972633,
+        0.7715231019974453,
+        0.7724055560101988
+      ],
+      "per_stream_decode_tps": [
+        31.06759357583433,
+        31.438108935529534,
+        30.76863281778187,
+        32.41986530051679
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 6.078595876693726,
+        "output_tokens": 712.0,
+        "output_tps": 117.13231385062426,
+        "request_drafts": 228.0,
+        "accepted_draft_tokens": 484.0,
+        "accepted_plus_bonus_per_draft": 3.1228070175438596,
+        "approx_iteration_ms_from_request_draft_counter": 106.64203292445133,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.2737752161383287,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 340.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 347.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 789.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 6,
+      "repeat": 0,
+      "batch_output_tps": 98.9741597898757,
+      "elapsed_seconds": 10.59872599299706,
+      "completion_tokens": 1049,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        152,
+        200,
+        188,
+        219,
+        138,
+        152
+      ],
+      "ttft_seconds": [
+        0.8669235659908736,
+        0.8677464509964921,
+        0.3635183570004301,
+        0.87147437800013,
+        0.8716593559947796,
+        0.8719250220019603
+      ],
+      "per_stream_decode_tps": [
+        20.829657258018116,
+        20.862061952029773,
+        19.305497296742487,
+        22.488639100590596,
+        23.775491903430268,
+        18.78283370796261
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.056162357330322,
+        "output_tokens": 459.0,
+        "output_tps": 113.16115075386277,
+        "request_drafts": 156.0,
+        "accepted_draft_tokens": 303.0,
+        "accepted_plus_bonus_per_draft": 2.9423076923076925,
+        "approx_iteration_ms_from_request_draft_counter": 156.0062445127047,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.0144092219020173,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 480.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 347.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 699.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 1,
+      "repeat": 0,
+      "batch_output_tps": 52.69557727077361,
+      "elapsed_seconds": 4.971954262000509,
+      "completion_tokens": 262,
+      "input_tokens": [
+        80
+      ],
+      "output_tokens": [
+        262
+      ],
+      "ttft_seconds": [
+        0.30409153300570324
+      ],
+      "per_stream_decode_tps": [
+        56.20004744777631
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0231964588165283,
+        "output_tokens": 114.0,
+        "output_tps": 56.346480591748595,
+        "request_drafts": 33.0,
+        "accepted_draft_tokens": 81.0,
+        "accepted_plus_bonus_per_draft": 3.4545454545454546,
+        "approx_iteration_ms_from_request_draft_counter": 61.30898360050086,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.4473684210526314,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 80.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 76.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 186.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 2,
+      "repeat": 0,
+      "batch_output_tps": 66.62890823214079,
+      "elapsed_seconds": 4.967813652998302,
+      "completion_tokens": 331,
+      "input_tokens": [
+        80,
+        80
+      ],
+      "output_tokens": [
+        188,
+        143
+      ],
+      "ttft_seconds": [
+        0.4107646430056775,
+        0.4112668220041087
+      ],
+      "per_stream_decode_tps": [
+        41.24073440176914,
+        34.26378159656114
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0265347957611084,
+        "output_tokens": 159.0,
+        "output_tps": 78.45905253271714,
+        "request_drafts": 50.0,
+        "accepted_draft_tokens": 109.0,
+        "accepted_plus_bonus_per_draft": 3.18,
+        "approx_iteration_ms_from_request_draft_counter": 81.06139183044434,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.0555555555555554,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 160.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 108.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 222.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 1,
+      "repeat": 0,
+      "batch_output_tps": 48.138690388888634,
+      "elapsed_seconds": 21.313417372002732,
+      "completion_tokens": 1026,
+      "input_tokens": [
+        51
+      ],
+      "output_tokens": [
+        1026
+      ],
+      "ttft_seconds": [
+        0.25807191799685825
+      ],
+      "per_stream_decode_tps": [
+        48.735455955973194
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 18.2121422290802,
+        "output_tokens": 904.0,
+        "output_tps": 49.637213932831024,
+        "request_drafts": 295.0,
+        "accepted_draft_tokens": 609.0,
+        "accepted_plus_bonus_per_draft": 3.064406779661017,
+        "approx_iteration_ms_from_request_draft_counter": 61.73607535281424,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.0087976539589443,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 51.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 341.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 685.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 2,
+      "repeat": 0,
+      "batch_output_tps": 72.18468746402296,
+      "elapsed_seconds": 18.078626449001604,
+      "completion_tokens": 1305,
+      "input_tokens": [
+        62,
+        62
+      ],
+      "output_tokens": [
+        606,
+        699
+      ],
+      "ttft_seconds": [
+        0.2828688290028367,
+        0.5981485489901388
+      ],
+      "per_stream_decode_tps": [
+        40.238716123550546,
+        40.02560554735299
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 12.166402816772461,
+        "output_tokens": 953.0,
+        "output_tps": 78.33046582069478,
+        "request_drafts": 290.0,
+        "accepted_draft_tokens": 663.0,
+        "accepted_plus_bonus_per_draft": 3.286206896551724,
+        "approx_iteration_ms_from_request_draft_counter": 83.9062263225687,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3096446700507616,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 124.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 394.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 910.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 2,
+      "repeat": 0,
+      "batch_output_tps": 70.95081536674859,
+      "elapsed_seconds": 18.252080589998513,
+      "completion_tokens": 1295,
+      "input_tokens": [
+        51,
+        51
+      ],
+      "output_tokens": [
+        659,
+        636
+      ],
+      "ttft_seconds": [
+        0.2728568960010307,
+        0.5680562040070072
+      ],
+      "per_stream_decode_tps": [
+        36.64378469941199,
+        36.414858526503224
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 14.168113946914673,
+        "output_tokens": 1051.0,
+        "output_tps": 74.18065692709025,
+        "request_drafts": 356.0,
+        "accepted_draft_tokens": 695.0,
+        "accepted_plus_bonus_per_draft": 2.952247191011236,
+        "approx_iteration_ms_from_request_draft_counter": 79.59614576918355,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.9365079365079367,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 102.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 441.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 854.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 8,
+      "repeat": 0,
+      "batch_output_tps": 116.06836022971,
+      "elapsed_seconds": 11.967085580006824,
+      "completion_tokens": 1389,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        169,
+        109,
+        170,
+        195,
+        232,
+        201,
+        174,
+        139
+      ],
+      "ttft_seconds": [
+        0.9649778019957012,
+        0.37421029900724534,
+        0.9656734540039906,
+        0.964914073003456,
+        0.9659100479912013,
+        0.9662289450061508,
+        0.9658693439996568,
+        0.9663508499943418
+      ],
+      "per_stream_decode_tps": [
+        17.55285725362531,
+        15.455346900810808,
+        18.816665019016956,
+        19.198323683129967,
+        21.055497448505363,
+        19.237784645969363,
+        18.62487506210836,
+        19.092438371437957
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.057449817657471,
+        "output_tokens": 534.0,
+        "output_tps": 131.60976080988223,
+        "request_drafts": 176.0,
+        "accepted_draft_tokens": 358.0,
+        "accepted_plus_bonus_per_draft": 3.034090909090909,
+        "approx_iteration_ms_from_request_draft_counter": 184.42953716624868,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.0596026490066226,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 640.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 453.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 933.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 6,
+      "repeat": 0,
+      "batch_output_tps": 130.47515105067427,
+      "elapsed_seconds": 14.240259429003345,
+      "completion_tokens": 1858,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        285,
+        345,
+        326,
+        296,
+        310,
+        296
+      ],
+      "ttft_seconds": [
+        0.9059549270023126,
+        0.9126682329952018,
+        0.9120256530004553,
+        0.9120545649930136,
+        0.90602419199422,
+        0.39258331300516147
+      ],
+      "per_stream_decode_tps": [
+        25.46295256965645,
+        25.858144734788823,
+        24.95139498198134,
+        25.801971361413592,
+        26.021456186542057,
+        24.680166695446417
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 8.08585000038147,
+        "output_tokens": 1143.0,
+        "output_tps": 141.35805140412896,
+        "request_drafts": 360.0,
+        "accepted_draft_tokens": 783.0,
+        "accepted_plus_bonus_per_draft": 3.175,
+        "approx_iteration_ms_from_request_draft_counter": 134.7641666730245,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.317857142857143,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 510.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 560.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1298.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 4,
+      "repeat": 0,
+      "batch_output_tps": 89.17027707582739,
+      "elapsed_seconds": 29.224984888001927,
+      "completion_tokens": 2606,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        660,
+        680,
+        652,
+        614
+      ],
+      "ttft_seconds": [
+        0.30779072899895255,
+        0.6703227560064988,
+        0.6712729860009858,
+        0.6715987639909144
+      ],
+      "per_stream_decode_tps": [
+        24.53073593855197,
+        23.806444253379095,
+        23.98742080196873,
+        25.206633030366056
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 22.33055281639099,
+        "output_tokens": 2102.0,
+        "output_tps": 94.13112238122012,
+        "request_drafts": 748.0,
+        "accepted_draft_tokens": 1354.0,
+        "accepted_plus_bonus_per_draft": 2.8101604278074865,
+        "approx_iteration_ms_from_request_draft_counter": 119.41472094326733,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.851203501094092,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 204.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 914.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1692.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 8,
+      "repeat": 0,
+      "batch_output_tps": 115.58532659456603,
+      "elapsed_seconds": 65.44948414200917,
+      "completion_tokens": 7565,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        1591,
+        1302,
+        796,
+        850,
+        702,
+        540,
+        898,
+        886
+      ],
+      "ttft_seconds": [
+        0.3652268199948594,
+        0.8760109889990417,
+        0.8754147620056756,
+        0.8746547729970189,
+        0.8746896380034741,
+        0.8775245669967262,
+        0.8743913959915517,
+        0.8779685049958061
+      ],
+      "per_stream_decode_tps": [
+        24.442966532362345,
+        22.341998258379075,
+        19.208273854398307,
+        19.29586706477993,
+        18.931953205786314,
+        18.58668352705129,
+        18.6465560712641,
+        18.630809822825015
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 26.350828886032104,
+        "output_tokens": 3788.0,
+        "output_tps": 143.75259375646894,
+        "request_drafts": 1136.0,
+        "accepted_draft_tokens": 2652.0,
+        "accepted_plus_bonus_per_draft": 3.334507042253521,
+        "approx_iteration_ms_from_request_draft_counter": 185.56921750726835,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3195785776997364,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 496.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 2278.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 5284.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 8,
+      "repeat": 1,
+      "batch_output_tps": 137.2808237027246,
+      "elapsed_seconds": 44.237788179001654,
+      "completion_tokens": 6073,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        704,
+        667,
+        759,
+        859,
+        647,
+        764,
+        836,
+        837
+      ],
+      "ttft_seconds": [
+        0.9263512970064767,
+        0.9257510540046496,
+        0.9258770539890975,
+        0.9250194810010726,
+        0.9243700700026238,
+        0.9237753619963769,
+        0.9231694379996043,
+        0.4268073919956805
+      ],
+      "per_stream_decode_tps": [
+        18.826933415093702,
+        18.374569348554513,
+        19.23834926288771,
+        19.823019859672357,
+        18.5225107748128,
+        19.294092736848725,
+        19.839464686168405,
+        19.63073473565642
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 32.444000005722046,
+        "output_tokens": 4730.0,
+        "output_tps": 145.7896683259088,
+        "request_drafts": 1408.0,
+        "accepted_draft_tokens": 3322.0,
+        "accepted_plus_bonus_per_draft": 3.359375,
+        "approx_iteration_ms_from_request_draft_counter": 184.34090912342072,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3703498056635204,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 496.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1801.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 4269.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 6,
+      "repeat": 1,
+      "batch_output_tps": 130.7645112692141,
+      "elapsed_seconds": 14.881713556009345,
+      "completion_tokens": 1946,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        358,
+        378,
+        324,
+        379,
+        256,
+        251
+      ],
+      "ttft_seconds": [
+        0.38938937700004317,
+        0.8954919669922674,
+        0.896374101008405,
+        0.8949314680066891,
+        0.9013108490034938,
+        0.9020912699925248
+      ],
+      "per_stream_decode_tps": [
+        26.136835977393638,
+        27.028859639522643,
+        26.7030306476871,
+        27.40956761086956,
+        26.73713654844067,
+        26.21310184080912
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 8.096916198730469,
+        "output_tokens": 1223.0,
+        "output_tps": 151.04515966112587,
+        "request_drafts": 372.0,
+        "accepted_draft_tokens": 851.0,
+        "accepted_plus_bonus_per_draft": 3.2876344086021505,
+        "approx_iteration_ms_from_request_draft_counter": 130.59542256016886,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.324786324786325,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 510.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 585.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1360.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 1,
+      "repeat": 1,
+      "batch_output_tps": 54.61799280006507,
+      "elapsed_seconds": 11.827604181002243,
+      "completion_tokens": 646,
+      "input_tokens": [
+        62
+      ],
+      "output_tokens": [
+        646
+      ],
+      "ttft_seconds": [
+        0.2879759890056448
+      ],
+      "per_stream_decode_tps": [
+        56.008600163846566
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 8.088457107543945,
+        "output_tokens": 446.0,
+        "output_tps": 55.14030600273871,
+        "request_drafts": 134.0,
+        "accepted_draft_tokens": 312.0,
+        "accepted_plus_bonus_per_draft": 3.328358208955224,
+        "approx_iteration_ms_from_request_draft_counter": 60.36162020555183,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.4,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 62.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 190.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 456.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 2,
+      "repeat": 1,
+      "batch_output_tps": 76.76140189235079,
+      "elapsed_seconds": 7.32138791300531,
+      "completion_tokens": 562,
+      "input_tokens": [
+        85,
+        85
+      ],
+      "output_tokens": [
+        265,
+        297
+      ],
+      "ttft_seconds": [
+        0.31491442800324876,
+        0.6573783450003248
+      ],
+      "per_stream_decode_tps": [
+        41.16027438342267,
+        44.64056965023458
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.045892000198364,
+        "output_tokens": 337.0,
+        "output_tps": 83.29436376044575,
+        "request_drafts": 102.0,
+        "accepted_draft_tokens": 235.0,
+        "accepted_plus_bonus_per_draft": 3.303921568627451,
+        "approx_iteration_ms_from_request_draft_counter": 79.331215690164,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3652694610778444,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 170.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 167.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 395.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 8,
+      "repeat": 1,
+      "batch_output_tps": 108.3420254432154,
+      "elapsed_seconds": 13.438921729990398,
+      "completion_tokens": 1456,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        258,
+        160,
+        273,
+        109,
+        109,
+        233,
+        207,
+        107
+      ],
+      "ttft_seconds": [
+        0.98567005500081,
+        0.9836945080023725,
+        0.39502548199379817,
+        0.9825742289976915,
+        0.982166674992186,
+        0.9856666790001327,
+        0.9850215549959103,
+        0.986253561990452
+      ],
+      "per_stream_decode_tps": [
+        21.14297625690306,
+        19.166941609038847,
+        20.897110971889287,
+        15.590087543964797,
+        15.5911478285268,
+        21.18733786025244,
+        18.385946860238985,
+        15.725903502711907
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.044610261917114,
+        "output_tokens": 499.0,
+        "output_tps": 123.37406268743378,
+        "request_drafts": 176.0,
+        "accepted_draft_tokens": 323.0,
+        "accepted_plus_bonus_per_draft": 2.8352272727272725,
+        "approx_iteration_ms_from_request_draft_counter": 183.84592099623248,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.020746887966805,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 640.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 482.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 974.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 1,
+      "repeat": 1,
+      "batch_output_tps": 44.72450327687151,
+      "elapsed_seconds": 3.0408386909984984,
+      "completion_tokens": 136,
+      "input_tokens": [
+        80
+      ],
+      "output_tokens": [
+        136
+      ],
+      "ttft_seconds": [
+        0.30032554900390096
+      ],
+      "per_stream_decode_tps": [
+        49.674164817984014
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 0,
+        "output_tokens": 0,
+        "output_tps": null,
+        "request_drafts": 0,
+        "accepted_draft_tokens": 0,
+        "accepted_plus_bonus_per_draft": null,
+        "approx_iteration_ms_from_request_draft_counter": null,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.022222222222222,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 80.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 45.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 91.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 2,
+      "repeat": 1,
+      "batch_output_tps": 69.37862415017005,
+      "elapsed_seconds": 24.50322445599886,
+      "completion_tokens": 1700,
+      "input_tokens": [
+        62,
+        62
+      ],
+      "output_tokens": [
+        957,
+        743
+      ],
+      "ttft_seconds": [
+        0.28772409798693843,
+        0.603106516005937
+      ],
+      "per_stream_decode_tps": [
+        39.51584479963281,
+        37.062503405748416
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 18.241705656051636,
+        "output_tokens": 1341.0,
+        "output_tps": 73.5128625187046,
+        "request_drafts": 430.0,
+        "accepted_draft_tokens": 911.0,
+        "accepted_plus_bonus_per_draft": 3.1186046511627907,
+        "approx_iteration_ms_from_request_draft_counter": 84.84514258628668,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.171641791044776,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 124.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 536.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1164.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 8,
+      "repeat": 1,
+      "batch_output_tps": 154.64893337445986,
+      "elapsed_seconds": 16.133315280996612,
+      "completion_tokens": 2495,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        317,
+        308,
+        369,
+        337,
+        368,
+        259,
+        307,
+        230
+      ],
+      "ttft_seconds": [
+        0.9912272530054906,
+        0.9944017030065879,
+        0.9924458690074971,
+        0.9932686730026035,
+        0.994635176990414,
+        0.3776678680005716,
+        0.9936759240081301,
+        0.9951283150003292
+      ],
+      "per_stream_decode_tps": [
+        23.515806721884754,
+        23.099546562163308,
+        24.617591235825348,
+        23.37607873675378,
+        24.29354135173101,
+        22.654542579395773,
+        22.189519656242396,
+        22.617071314396945
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 8.089926719665527,
+        "output_tokens": 1416.0,
+        "output_tps": 175.0324878169655,
+        "request_drafts": 440.0,
+        "accepted_draft_tokens": 976.0,
+        "accepted_plus_bonus_per_draft": 3.2181818181818183,
+        "approx_iteration_ms_from_request_draft_counter": 147.0895767211914,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3373493975903616,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 680.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 747.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1746.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 4,
+      "repeat": 1,
+      "batch_output_tps": 83.15100518656331,
+      "elapsed_seconds": 6.83094568400702,
+      "completion_tokens": 568,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        135,
+        180,
+        101,
+        152
+      ],
+      "ttft_seconds": [
+        0.3701287589938147,
+        0.792000087996712,
+        0.7991822250041878,
+        0.7992926729930332
+      ],
+      "per_stream_decode_tps": [
+        27.921425699193406,
+        29.797475974467556,
+        26.161391283087262,
+        30.940716432049854
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0234553813934326,
+        "output_tokens": 224.0,
+        "output_tps": 110.70172441645074,
+        "request_drafts": 68.0,
+        "accepted_draft_tokens": 156.0,
+        "accepted_plus_bonus_per_draft": 3.2941176470588234,
+        "approx_iteration_ms_from_request_draft_counter": 119.02678714079015,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.24,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 320.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 175.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 392.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 6,
+      "repeat": 1,
+      "batch_output_tps": 100.52383463515746,
+      "elapsed_seconds": 45.531490283989115,
+      "completion_tokens": 4577,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        652,
+        668,
+        695,
+        744,
+        1089,
+        729
+      ],
+      "ttft_seconds": [
+        0.31967627599078696,
+        0.717993241007207,
+        0.7179454809956951,
+        0.7184737229981693,
+        0.7182923459913582,
+        0.7225248350005131
+      ],
+      "per_stream_decode_tps": [
+        19.95078261327284,
+        19.546558870474666,
+        19.112465138617132,
+        19.618280600450415,
+        24.297561128400048,
+        19.74602076846106
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 30.344545602798462,
+        "output_tokens": 3381.0,
+        "output_tps": 111.42035357050113,
+        "request_drafts": 1224.0,
+        "accepted_draft_tokens": 2157.0,
+        "accepted_plus_bonus_per_draft": 2.7622549019607843,
+        "approx_iteration_ms_from_request_draft_counter": 148.74777256273757,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.8809823677581865,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 306.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1588.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 2987.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 8,
+      "repeat": 1,
+      "batch_output_tps": 115.38764422118759,
+      "elapsed_seconds": 50.94132946099853,
+      "completion_tokens": 5878,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51,
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        1163,
+        619,
+        748,
+        718,
+        645,
+        750,
+        620,
+        615
+      ],
+      "ttft_seconds": [
+        0.8295782730128849,
+        0.8283319940092042,
+        0.8290705910039833,
+        0.8278876240074169,
+        0.3782278500002576,
+        0.8275008859927766,
+        0.8288739010022255,
+        0.8293315829942003
+      ],
+      "per_stream_decode_tps": [
+        23.200864294426562,
+        17.7459089090844,
+        17.83249482048968,
+        17.37898807954636,
+        16.27219728389284,
+        18.04532608231962,
+        16.852088039254802,
+        17.730874442825385
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 32.41874933242798,
+        "output_tokens": 4291.0,
+        "output_tps": 132.36167613991753,
+        "request_drafts": 1544.0,
+        "accepted_draft_tokens": 2747.0,
+        "accepted_plus_bonus_per_draft": 2.7791450777202074,
+        "approx_iteration_ms_from_request_draft_counter": 167.97279446853875,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.880392156862745,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 408.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 2040.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 3836.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 1,
+      "repeat": 1,
+      "batch_output_tps": 45.85720936632184,
+      "elapsed_seconds": 16.442343753995374,
+      "completion_tokens": 754,
+      "input_tokens": [
+        51
+      ],
+      "output_tokens": [
+        754
+      ],
+      "ttft_seconds": [
+        0.25919992799754255
+      ],
+      "per_stream_decode_tps": [
+        46.589509422501465
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 14.203802347183228,
+        "output_tokens": 670.0,
+        "output_tps": 47.17046771161727,
+        "request_drafts": 232.0,
+        "accepted_draft_tokens": 438.0,
+        "accepted_plus_bonus_per_draft": 2.887931034482759,
+        "approx_iteration_ms_from_request_draft_counter": 61.22328597923805,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.8522727272727275,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 51.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 264.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 489.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 2,
+      "repeat": 1,
+      "batch_output_tps": 68.22700953130649,
+      "elapsed_seconds": 21.032726039993577,
+      "completion_tokens": 1435,
+      "input_tokens": [
+        51,
+        51
+      ],
+      "output_tokens": [
+        651,
+        784
+      ],
+      "ttft_seconds": [
+        0.5563055129896384,
+        0.26465643299161457
+      ],
+      "per_stream_decode_tps": [
+        35.042255107592055,
+        37.740793488868185
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 16.193756580352783,
+        "output_tokens": 1154.0,
+        "output_tps": 71.26203202289088,
+        "request_drafts": 402.0,
+        "accepted_draft_tokens": 752.0,
+        "accepted_plus_bonus_per_draft": 2.870646766169154,
+        "approx_iteration_ms_from_request_draft_counter": 80.5659531360835,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.9107505070993915,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 102.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 493.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 942.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 6,
+      "repeat": 1,
+      "batch_output_tps": 103.7524026386683,
+      "elapsed_seconds": 12.838256908988114,
+      "completion_tokens": 1332,
+      "input_tokens": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "output_tokens": [
+        182,
+        239,
+        201,
+        271,
+        140,
+        299
+      ],
+      "ttft_seconds": [
+        0.8735383129969705,
+        0.8730549030005932,
+        0.8724825630051782,
+        0.37455693999072537,
+        0.8725036029936746,
+        0.8735075129952747
+      ],
+      "per_stream_decode_tps": [
+        20.538794546860956,
+        23.6433392671323,
+        22.014346794498497,
+        23.6067014795661,
+        24.438846533051212,
+        25.00003017621973
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 4.045687437057495,
+        "output_tokens": 501.0,
+        "output_tps": 123.83556757523185,
+        "request_drafts": 162.0,
+        "accepted_draft_tokens": 339.0,
+        "accepted_plus_bonus_per_draft": 3.0925925925925926,
+        "approx_iteration_ms_from_request_draft_counter": 149.84027544657388,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.1918465227817747,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 480.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 417.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 914.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 4,
+      "repeat": 1,
+      "batch_output_tps": 90.351192817588,
+      "elapsed_seconds": 35.57230291899759,
+      "completion_tokens": 3214,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        877,
+        1283,
+        540,
+        514
+      ],
+      "ttft_seconds": [
+        0.7038941799983149,
+        0.3195240390050458,
+        0.7041386450000573,
+        0.7045675580011448
+      ],
+      "per_stream_decode_tps": [
+        31.52351713976548,
+        36.39085613050304,
+        28.39627464458153,
+        27.39322179958565
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 16.189396619796753,
+        "output_tokens": 1781.0,
+        "output_tps": 110.01027659191163,
+        "request_drafts": 520.0,
+        "accepted_draft_tokens": 1261.0,
+        "accepted_plus_bonus_per_draft": 3.425,
+        "approx_iteration_ms_from_request_draft_counter": 124.53382015228271,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.425373134328358,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 248.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 938.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 2275.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 1,
+      "repeat": 1,
+      "batch_output_tps": 54.36441508018107,
+      "elapsed_seconds": 4.488230023998767,
+      "completion_tokens": 244,
+      "input_tokens": [
+        85
+      ],
+      "output_tokens": [
+        244
+      ],
+      "ttft_seconds": [
+        0.30150859999412205
+      ],
+      "per_stream_decode_tps": [
+        58.35524494326921
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0205578804016113,
+        "output_tokens": 115.0,
+        "output_tps": 56.9149743817991,
+        "request_drafts": 34.0,
+        "accepted_draft_tokens": 81.0,
+        "accepted_plus_bonus_per_draft": 3.3823529411764706,
+        "approx_iteration_ms_from_request_draft_counter": 59.42817295298857,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.375,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 85.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 72.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 171.0
+      }
+    },
+    {
+      "category": "prose",
+      "concurrency": 4,
+      "repeat": 1,
+      "batch_output_tps": 85.38670393528717,
+      "elapsed_seconds": 32.686587856995175,
+      "completion_tokens": 2791,
+      "input_tokens": [
+        51,
+        51,
+        51,
+        51
+      ],
+      "output_tokens": [
+        621,
+        677,
+        764,
+        729
+      ],
+      "ttft_seconds": [
+        0.30184247200668324,
+        0.6538503060000949,
+        0.6530433099978836,
+        0.6545414940046612
+      ],
+      "per_stream_decode_tps": [
+        22.75873597731759,
+        22.794043063807123,
+        23.837353869589492,
+        23.662531654433536
+      ],
+      "validations": [
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        },
+        {
+          "scope": "Completed nonempty response with reasoning; prose semantics not automatically graded",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 24.35224676132202,
+        "output_tokens": 2152.0,
+        "output_tps": 88.36966958703623,
+        "request_drafts": 792.0,
+        "accepted_draft_tokens": 1360.0,
+        "accepted_plus_bonus_per_draft": 2.717171717171717,
+        "approx_iteration_ms_from_request_draft_counter": 122.99114525920213,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.784431137724551,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 204.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1002.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 1788.0
+      }
+    },
+    {
+      "category": "coding",
+      "concurrency": 6,
+      "repeat": 1,
+      "batch_output_tps": 108.86296885850943,
+      "elapsed_seconds": 40.64743086100498,
+      "completion_tokens": 4425,
+      "input_tokens": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "output_tokens": [
+        716,
+        781,
+        998,
+        779,
+        823,
+        328
+      ],
+      "ttft_seconds": [
+        0.8050369810080156,
+        0.8049662289995467,
+        0.8047410759900231,
+        0.8041257290024078,
+        0.8049632379988907,
+        0.3605558699928224
+      ],
+      "per_stream_decode_tps": [
+        21.846107229134283,
+        22.478552810308187,
+        25.041191367717794,
+        23.275631244362256,
+        22.137476903632958,
+        22.163657858332893
+      ],
+      "validations": [
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        },
+        {
+          "scope": "Python syntax and required function present; generated code not executed",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 12.147083282470703,
+        "output_tokens": 1527.0,
+        "output_tps": 125.70918997514356,
+        "request_drafts": 462.0,
+        "accepted_draft_tokens": 1065.0,
+        "accepted_plus_bonus_per_draft": 3.3051948051948052,
+        "approx_iteration_ms_from_request_draft_counter": 157.75432834377537,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.347464042392127,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 372.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 1321.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 3101.0
+      }
+    },
+    {
+      "category": "math",
+      "concurrency": 4,
+      "repeat": 1,
+      "batch_output_tps": 107.59683889019907,
+      "elapsed_seconds": 10.492873319002683,
+      "completion_tokens": 1129,
+      "input_tokens": [
+        85,
+        85,
+        85,
+        85
+      ],
+      "output_tokens": [
+        293,
+        314,
+        278,
+        244
+      ],
+      "ttft_seconds": [
+        0.9693404330027988,
+        0.9685771810036385,
+        0.3495509649947053,
+        0.6322125919978134
+      ],
+      "per_stream_decode_tps": [
+        32.25430486569478,
+        32.94674763846473,
+        29.23496784888157,
+        28.879403024404578
+      ],
+      "validations": [
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        },
+        {
+          "scope": "Expected arrival time 14:06 present; not a full proof check",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 6.06981897354126,
+        "output_tokens": 712.0,
+        "output_tps": 117.30168611348293,
+        "request_drafts": 220.0,
+        "accepted_draft_tokens": 492.0,
+        "accepted_plus_bonus_per_draft": 3.2363636363636363,
+        "approx_iteration_ms_from_request_draft_counter": 110.36034497347745,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 3.3802395209580838,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 340.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 334.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 795.0
+      }
+    },
+    {
+      "category": "json",
+      "concurrency": 2,
+      "repeat": 1,
+      "batch_output_tps": 61.08465373873996,
+      "elapsed_seconds": 7.579645158999483,
+      "completion_tokens": 463,
+      "input_tokens": [
+        80,
+        80
+      ],
+      "output_tokens": [
+        276,
+        187
+      ],
+      "ttft_seconds": [
+        0.6800670689990511,
+        0.31093464099103585
+      ],
+      "per_stream_decode_tps": [
+        39.990472001076974,
+        32.86461249915628
+      ],
+      "validations": [
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        },
+        {
+          "scope": "Requested JSON schema",
+          "passed": true
+        }
+      ],
+      "all_checks_passed": true,
+      "full_window": {
+        "seconds": 2.0343306064605713,
+        "output_tokens": 131.0,
+        "output_tps": 64.39464636867469,
+        "request_drafts": 50.0,
+        "accepted_draft_tokens": 81.0,
+        "accepted_plus_bonus_per_draft": 2.62,
+        "approx_iteration_ms_from_request_draft_counter": 81.37322425842285,
+        "timing_scope": "Sampled server wall time; not a GPU kernel trace. Draft counter is per request."
+      },
+      "accepted_plus_bonus_per_draft": 2.967948717948718,
+      "metrics_delta": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prefix_cache_queries_total": 160.0,
+        "vllm:prefix_cache_hits_total": 0.0,
+        "vllm:spec_decode_num_drafts_total": 156.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 307.0
+      }
+    }
+  ],
+  "groups": [
+    {
+      "category": "coding",
+      "concurrency": 1,
+      "batches": 2,
+      "batch_tps_median": 52.44035161461996,
+      "batch_tps_min": 50.26271042917486,
+      "batch_tps_max": 54.61799280006507,
+      "all_checks_passed": true
+    },
+    {
+      "category": "coding",
+      "concurrency": 2,
+      "batches": 2,
+      "batch_tps_median": 70.78165580709651,
+      "batch_tps_min": 69.37862415017005,
+      "batch_tps_max": 72.18468746402296,
+      "all_checks_passed": true
+    },
+    {
+      "category": "coding",
+      "concurrency": 4,
+      "batches": 2,
+      "batch_tps_median": 91.0372896221463,
+      "batch_tps_min": 90.351192817588,
+      "batch_tps_max": 91.72338642670461,
+      "all_checks_passed": true
+    },
+    {
+      "category": "coding",
+      "concurrency": 6,
+      "batches": 2,
+      "batch_tps_median": 112.04344600662776,
+      "batch_tps_min": 108.86296885850943,
+      "batch_tps_max": 115.22392315474607,
+      "all_checks_passed": true
+    },
+    {
+      "category": "coding",
+      "concurrency": 8,
+      "batches": 2,
+      "batch_tps_median": 126.43307514864532,
+      "batch_tps_min": 115.58532659456603,
+      "batch_tps_max": 137.2808237027246,
+      "all_checks_passed": true
+    },
+    {
+      "category": "json",
+      "concurrency": 1,
+      "batches": 2,
+      "batch_tps_median": 48.71004027382256,
+      "batch_tps_min": 44.72450327687151,
+      "batch_tps_max": 52.69557727077361,
+      "all_checks_passed": true
+    },
+    {
+      "category": "json",
+      "concurrency": 2,
+      "batches": 2,
+      "batch_tps_median": 63.85678098544037,
+      "batch_tps_min": 61.08465373873996,
+      "batch_tps_max": 66.62890823214079,
+      "all_checks_passed": true
+    },
+    {
+      "category": "json",
+      "concurrency": 4,
+      "batches": 2,
+      "batch_tps_median": 81.09010859043792,
+      "batch_tps_min": 79.02921199431255,
+      "batch_tps_max": 83.15100518656331,
+      "all_checks_passed": true
+    },
+    {
+      "category": "json",
+      "concurrency": 6,
+      "batches": 2,
+      "batch_tps_median": 101.363281214272,
+      "batch_tps_min": 98.9741597898757,
+      "batch_tps_max": 103.7524026386683,
+      "all_checks_passed": true
+    },
+    {
+      "category": "json",
+      "concurrency": 8,
+      "batches": 2,
+      "batch_tps_median": 112.2051928364627,
+      "batch_tps_min": 108.3420254432154,
+      "batch_tps_max": 116.06836022971,
+      "all_checks_passed": true
+    },
+    {
+      "category": "prose",
+      "concurrency": 1,
+      "batches": 2,
+      "batch_tps_median": 46.99794987760524,
+      "batch_tps_min": 45.85720936632184,
+      "batch_tps_max": 48.138690388888634,
+      "all_checks_passed": true
+    },
+    {
+      "category": "prose",
+      "concurrency": 2,
+      "batches": 2,
+      "batch_tps_median": 69.58891244902753,
+      "batch_tps_min": 68.22700953130649,
+      "batch_tps_max": 70.95081536674859,
+      "all_checks_passed": true
+    },
+    {
+      "category": "prose",
+      "concurrency": 4,
+      "batches": 2,
+      "batch_tps_median": 87.27849050555727,
+      "batch_tps_min": 85.38670393528717,
+      "batch_tps_max": 89.17027707582739,
+      "all_checks_passed": true
+    },
+    {
+      "category": "prose",
+      "concurrency": 6,
+      "batches": 2,
+      "batch_tps_median": 99.96032613376468,
+      "batch_tps_min": 99.3968176323719,
+      "batch_tps_max": 100.52383463515746,
+      "all_checks_passed": true
+    },
+    {
+      "category": "prose",
+      "concurrency": 8,
+      "batches": 2,
+      "batch_tps_median": 114.41625862205683,
+      "batch_tps_min": 113.44487302292607,
+      "batch_tps_max": 115.38764422118759,
+      "all_checks_passed": true
+    },
+    {
+      "category": "math",
+      "concurrency": 1,
+      "batches": 2,
+      "batch_tps_median": 53.40000507383665,
+      "batch_tps_min": 52.43559506749223,
+      "batch_tps_max": 54.36441508018107,
+      "all_checks_passed": true
+    },
+    {
+      "category": "math",
+      "concurrency": 2,
+      "batches": 2,
+      "batch_tps_median": 74.86709656335398,
+      "batch_tps_min": 72.97279123435719,
+      "batch_tps_max": 76.76140189235079,
+      "all_checks_passed": true
+    },
+    {
+      "category": "math",
+      "concurrency": 4,
+      "batches": 2,
+      "batch_tps_median": 109.36226019751761,
+      "batch_tps_min": 107.59683889019907,
+      "batch_tps_max": 111.12768150483616,
+      "all_checks_passed": true
+    },
+    {
+      "category": "math",
+      "concurrency": 6,
+      "batches": 2,
+      "batch_tps_median": 130.61983115994417,
+      "batch_tps_min": 130.47515105067427,
+      "batch_tps_max": 130.7645112692141,
+      "all_checks_passed": true
+    },
+    {
+      "category": "math",
+      "concurrency": 8,
+      "batches": 2,
+      "batch_tps_median": 151.32145301101986,
+      "batch_tps_min": 147.99397264757985,
+      "batch_tps_max": 154.64893337445986,
+      "all_checks_passed": true
+    }
+  ],
+  "timing_note": "Full windows use the same request IDs already generating at both adjacent sample endpoints. Approximate iteration ms derives from server wall time and per-request draft counters, not GPU profiling. Two repeats are a small sample; do not infer a stable gain from a single best cell."
+}
