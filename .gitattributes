@@ -1,8 +1,11 @@
-* text=auto eol=lf
-*.py text eol=lf
-*.sh text eol=lf
-*.md text eol=lf
-*.patch text eol=lf
-*.diff text eol=lf
-*.json text eol=lf
-*.png binary
+# Preserve inherited upstream files; normalize only this deployment profile.
+/profiles/ring-1m/** text=auto eol=lf
+/profiles/ring-1m/**/*.png binary
+/README.md text eol=lf
+/UPSTREAM_README.md text eol=lf
+/NOTICE.md text eol=lf
+/PRIVACY-REVIEW.md text eol=lf
+/LICENSE text eol=lf
+/LICENSES/** text eol=lf
+/.gitignore text eol=lf
+/.gitattributes text eol=lf

@@ -2,7 +2,7 @@
 
 These are NestuFNG's four-Spark Ring measurements. The separate root `results/boot*/` directories are inherited upstream experiments with different prompts, thinking and sampling settings.
 
-**Long-input validation is in progress; only completed cases below are claimed.** Configured context limit: 1,048,576. All results here used thinking ON / effort max, temperature 1, top_p .95. Server usage counts include thinking tokens. No OFF or full-BF16 comparison was run.
+**All four long-input retrieval cases passed.** Configured context limit: 1,048,576. All results here used thinking ON / effort max, temperature 1, top_p .95. Server usage counts include thinking tokens. No OFF or full-BF16 comparison was run.
 
 ## Six independent coding tasks
 
@@ -28,6 +28,7 @@ Accepted draft tokens plus the bonus token average **3.536 per request step** fo
 | 65,254 | 204 | 262,144 | 59.17 | 1105.77 | 64.30 | PASS |
 | 261,832 | 199 | 262,144 | 248.87 | 1054.47 | 66.59 | PASS |
 | 784,046 | 201 | 262,144 | 912.30 | 861.01 | 63.77 | PASS |
+| 982,126 | 160 | 65,536 | 1214.02 | 810.36 | 60.54 | PASS |
 
 Synthetic unique records contain three exact values at approximately 12%, 51% and 89% of the input. All values must match. Each case has a distinct cache salt. The final near-1M input uses a 65,536 output allowance; earlier cases allow 262,144. Actual generated output is much shorter. These are sequential retrieval cases, not six simultaneous 1M contexts or a complete long-context quality suite.
 
@@ -40,6 +41,15 @@ A real model→tool→model round trip passed: synthetic lookup, multiplication,
 The upstream [fixed benchmark](../../../bench/v41bench.py) sends the same task to every stream in a category, with distinct short tags. It uses thinking OFF, temperature 0, and 150–256-token output allowances. Its code C6 result is 225.5 token/s and its eight-category C6 mean is 131.86. Our six different tasks, max reasoning, temperature 1, and 262,144-token allowances are not the same workload. The upstream mean draft acceptance length of 3.57 is close to our whole-batch 3.536; that comparison alone does not explain the throughput gap.
 
 The proven explanation is partial tail underutilization. Prompt content, speculative acceptance by category, GPU state, the 1M configuration and actual kernel/communication time remain possible factors requiring matched measurements. We do not claim to outperform upstream in throughput or to have established thinking mode as the sole cause. Source: [upstream snapshot](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/tree/ca662ac35193c69ace9cee37f13a94abf2eff0fc).
+
+## Same coding prompt, still ON/max
+
+An additional single C1 batch and single C6 batch use the upstream `merge_intervals` prompt. Temperature remains 1.0, top_p .95 and output allowance 262,144. Distinct salts avoid prefix cache reuse. This controls task content, but it still does not reproduce upstream's OFF/temperature-0 measurement, and one batch does not establish a stable performance distribution.
+
+| Concurrency | Batch output token/s | Continuous C6 token/s | Output length range | Accepted + bonus / step | Result |
+|---|---:|---:|---:|---:|---|
+| 1 | 57.88 | — | 543–543 | 4.371 | PASS |
+| 6 | 118.82 | 135.06 | 557–992 | 4.328 | PASS |
 
 ## Limits
 

@@ -17,7 +17,7 @@ This is a fork of [Tech2Wild / Kai's work](https://github.com/tonyd2wild/DeepSee
 
 ## Current evidence
 
-**Long-input validation is in progress; only completed cases below are claimed.** See [the full table](profiles/ring-1m/results/README.md).
+**All four long-input retrieval cases passed.** See [the full table](profiles/ring-1m/results/README.md).
 
 ### 实测速度 / Measured prefill and decode
 
@@ -28,6 +28,7 @@ This is a fork of [Tech2Wild / Kai's work](https://github.com/tonyd2wild/DeepSee
 | 65,254 | 204 | 262,144 | 59.17 | 1105.77 | 64.30 | PASS |
 | 261,832 | 199 | 262,144 | 248.87 | 1054.47 | 66.59 | PASS |
 | 784,046 | 201 | 262,144 | 912.30 | 861.01 | 63.77 | PASS |
+| 982,126 | 160 | 65,536 | 1214.02 | 810.36 | 60.54 | PASS |
 
 ### 六路吞吐 / Six-request throughput
 
@@ -37,6 +38,8 @@ This is a fork of [Tech2Wild / Kai's work](https://github.com/tonyd2wild/DeepSee
 | 六路同时生成的完整采样区间 / Continuous six-active interval | **100.50** |
 
 Six mixed coding requests produced **13,551 output tokens** at **75.22 token/s** over the entire draining batch. The measured interval with all six active produced **100.50 token/s**. These include thinking tokens and are not directly comparable to upstream's OFF/temperature-0 benchmarks. We make no throughput-superiority claim.
+
+Additional upstream coding-prompt check, still **ON/max**: C1 batch **57.88 token/s**; C6 batch **118.82 token/s**, with **135.06 token/s** during the continuous six-active interval. This is one batch per concurrency, with different thinking/sampling/output lengths from upstream; see [conditions and raw results](profiles/ring-1m/results/README.md#same-coding-prompt-still-onmax).
 
 **Six scheduled requests do not mean six full 1M contexts fit at once.** The logical pool holds about 4.68 × the configured maximum context. Long tests are sequential retrieval checks; output budgets are not measured generated lengths. The current profile keeps FP8 and does not include experimental FP4 kernels.
 
