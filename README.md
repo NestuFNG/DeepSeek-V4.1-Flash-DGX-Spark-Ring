@@ -19,6 +19,23 @@ This is a fork of [Tech2Wild / Kai's work](https://github.com/tonyd2wild/DeepSee
 
 **Long-input validation is in progress; only completed cases below are claimed.** See [the full table](profiles/ring-1m/results/README.md).
 
+### 实测速度 / Measured prefill and decode
+
+**Thinking ON · effort max · temperature 1.0 · top_p 0.95 · FP8 KV.** The following are single-request long-input retrieval measurements. Decode includes thinking tokens and is measured after the first token; prefill comes from server timing counters. Output allowances are not actual generated output lengths.
+
+| 实际输入 / Input tokens | 实际输出 / Output tokens | 输出预算 / Output allowance | 首 token / TTFT (s) | Prefill (token/s) | Decode (token/s) | 验收 / Check |
+|---|---:|---:|---:|---:|---:|---|
+| 65,254 | 204 | 262,144 | 59.17 | 1105.77 | 64.30 | PASS |
+| 261,832 | 199 | 262,144 | 248.87 | 1054.47 | 66.59 | PASS |
+| 784,046 | 201 | 262,144 | 912.30 | 861.01 | 63.77 | PASS |
+
+### 六路吞吐 / Six-request throughput
+
+| 测量口径 / Measurement | Output token/s |
+|---|---:|
+| 整批平均，含最后少数任务收尾 / Whole draining batch | **75.22** |
+| 六路同时生成的完整采样区间 / Continuous six-active interval | **100.50** |
+
 Six mixed coding requests produced **13,551 output tokens** at **75.22 token/s** over the entire draining batch. The measured interval with all six active produced **100.50 token/s**. These include thinking tokens and are not directly comparable to upstream's OFF/temperature-0 benchmarks. We make no throughput-superiority claim.
 
 **Six scheduled requests do not mean six full 1M contexts fit at once.** The logical pool holds about 4.68 × the configured maximum context. Long tests are sequential retrieval checks; output budgets are not measured generated lengths. The current profile keeps FP8 and does not include experimental FP4 kernels.
@@ -36,3 +53,5 @@ Each node keeps weights and Engram on local NVMe. A separate management network 
 ## License
 
 MIT for the original repository and our recipe additions; modified vLLM files keep Apache-2.0. NVIDIA and downloaded dependencies retain their licenses. See [NOTICE.md](NOTICE.md). No weights, container images, credentials or private deployment logs are published. This project is not affiliated with or endorsed by DeepSeek, NVIDIA, vLLM or FlashInfer.
+
+**开源万岁！**
