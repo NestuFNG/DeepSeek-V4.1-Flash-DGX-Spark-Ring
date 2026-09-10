@@ -1,0 +1,22 @@
+--- weight_utils.official.py
++++ weight_utils.patched.py
+@@ -9,6 +9,8 @@
+ import hashlib
+ import json
+ import os
++
++_DSV41_ENGRAM_DISK = os.environ.get("DSV41_ENGRAM_DISK", "0") == "1"
+ import tempfile
+ import threading
+ import time
+@@ -964,6 +966,10 @@
+                 for name in f.keys():  # noqa: SIM118
+                     if should_skip_weight(name, local_expert_ids):
+                         continue
++                    # Tech2Wild/Kai 2026-09-10: DSV41_ENGRAM_DISK=1 leaves the
++                    # Engram tables on disk (see deepseek_v4_1/common/engram.py)
++                    if _DSV41_ENGRAM_DISK and name.endswith((".engram.embed.weight", ".engram.embed.scale")):
++                        continue
+                     param = f.get_tensor(name)
+                     yield name, param
+ 

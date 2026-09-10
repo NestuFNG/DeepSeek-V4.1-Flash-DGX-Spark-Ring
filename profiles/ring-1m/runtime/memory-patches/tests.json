@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "concurrency": 1,
+      "ratio": 1,
+      "workspace_rows": 1048576,
+      "chunks": 4
+    },
+    {
+      "concurrency": 1,
+      "ratio": 2,
+      "workspace_rows": 524288,
+      "chunks": 2
+    },
+    {
+      "concurrency": 6,
+      "ratio": 1,
+      "workspace_rows": 6291456,
+      "chunks": 29
+    },
+    {
+      "concurrency": 6,
+      "ratio": 2,
+      "workspace_rows": 3145728,
+      "chunks": 17
+    },
+    {
+      "concurrency": 48,
+      "ratio": 1,
+      "workspace_rows": 41943040,
+      "chunks": 29
+    },
+    {
+      "concurrency": 48,
+      "ratio": 2,
+      "workspace_rows": 20971520,
+      "chunks": 17
+    }
+  ],
+  "sha256": "6612edab9223e12d2a73a455ab794649f0bca92cfe544852b904dd378395e711"
+}

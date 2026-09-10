@@ -1,0 +1,14 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "messages": [{"role": "user", "content": "Explain your approach and write a tested Python interval-merging function."}],
+  "stream": true,
+  "stream_options": {"include_usage": true},
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "max_tokens": 262144,
+  "chat_template_kwargs": {
+    "thinking": true,
+    "reasoning_effort": "max",
+    "drop_thinking": false
+  }
+}

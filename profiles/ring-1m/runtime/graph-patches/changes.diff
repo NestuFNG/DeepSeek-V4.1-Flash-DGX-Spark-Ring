@@ -1,0 +1,429 @@
+--- baseline/engram.py
++++ optimized/engram.py
+@@ -687,6 +687,61 @@
+ _DSV41_ENGRAM_DISK = _kai_os.environ.get("DSV41_ENGRAM_DISK", "0") == "1"
+ 
+ 
++# --- Tech2Wild/Kai 2026-09-10 (CUDA graphs): one process-wide read pool shared
++# by every DiskEngramTable. A step's reads for BOTH engram layers (weight and
++# scale rows) go out as one batch, so decode latency is ~one pread instead of
++# 24 serial ones (measured on Reddie: 7.7 ms serial vs 3.1 ms parallel, C1).
++_KAI_THREADS = int(_kai_os.environ.get("DSV41_ENGRAM_DISK_THREADS", "32"))
++_KAI_CHUNK = int(_kai_os.environ.get("DSV41_ENGRAM_DISK_CHUNK", "16"))
++_KAI_POOL: _KaiPool | None = None
++
++
++def _kai_pool() -> _KaiPool:
++    global _KAI_POOL
++    if _KAI_POOL is None:
++        _KAI_POOL = _KaiPool(max_workers=_KAI_THREADS, thread_name_prefix="engram-disk")
++    return _KAI_POOL
++
++
++def _kai_pread_rows(
++    fd: int, base: int, rel: list, lo: int, hi: int, row_bytes: int, buf
++) -> None:
++    for i in range(lo, hi):
++        off = base + rel[i] * row_bytes
++        view = buf[i * row_bytes : (i + 1) * row_bytes]
++        got = 0
++        while got < row_bytes:
++            n = _kai_os.preadv(fd, [view[got:]], off + got)
++            if n <= 0:
++                raise OSError("engram disk table: short read")
++            got += n
++
++
++def _kai_parallel_read(jobs: list) -> None:
++    """jobs: [(fd, base, rel_list, row_bytes, memoryview)]. Every row of every job
++    is in flight at once: a task carries ceil(total / threads) rows (1 row at
++    decode sizes), capped at DSV41_ENGRAM_DISK_CHUNK for prefill-sized batches.
++    Only the calling thread submits, so the shared pool cannot deadlock."""
++    total = sum(len(job[2]) for job in jobs)
++    if total == 0:
++        return
++    if total == 1:
++        for fd, base, rel, row_bytes, buf in jobs:
++            _kai_pread_rows(fd, base, rel, 0, len(rel), row_bytes, buf)
++        return
++    chunk = max(1, min(_KAI_CHUNK, -(-total // _KAI_THREADS)))
++    pool = _kai_pool()
++    futs = [
++        pool.submit(
++            _kai_pread_rows, fd, base, rel, lo, min(lo + chunk, len(rel)), row_bytes, buf
++        )
++        for fd, base, rel, row_bytes, buf in jobs
++        for lo in range(0, len(rel), chunk)
++    ]
++    for fut in futs:
++        fut.result()
++
++
+ class DiskEngramTable:
+     """Tech2Wild/Kai 2026-09-10: read Engram rows straight from the safetensors
+     shards with positional preads on a thread pool, so the per-rank Engram
+@@ -697,7 +752,15 @@
+     Lineage: our own PLE-on-disk patch for Qwen3.8-Flash-Next (2026-09-05).
+     """
+ 
+-    def __init__(self, model_dir: str, layer_id: int, dim: int, block_size: int):
++    def __init__(
++        self,
++        model_dir: str,
++        layer_id: int,
++        dim: int,
++        block_size: int,
++        row_start: int = 0,
++        num_rows: int | None = None,
++    ):
+         idx_path = _kai_os.path.join(model_dir, "model.safetensors.index.json")
+         with open(idx_path) as f:
+             weight_map = _kai_json.load(f)["weight_map"]
+@@ -709,14 +772,26 @@
+         self.sb = dim // block_size
+         assert self.w_shape[1] == dim, (self.w_shape, dim)
+         assert self.s_shape[1] == self.sb, (self.s_shape, self.sb)
+-        self.threads = int(_kai_os.environ.get("DSV41_ENGRAM_DISK_THREADS", "32"))
+-        self.chunk = int(_kai_os.environ.get("DSV41_ENGRAM_DISK_CHUNK", "16"))
+-        self.pool = _KaiPool(max_workers=self.threads)
++        assert self.s_shape[0] == self.w_shape[0], (self.s_shape, self.w_shape)
++        # The checkpoint holds the FULL table (every TP rank's hash heads) per layer,
++        # while callers pass rank-local row ids (global - vocab_start), so reads must
++        # start at this rank's first row.
++        if num_rows is None:
++            num_rows = self.w_shape[0] - row_start
++        assert 0 <= row_start and row_start + num_rows <= self.w_shape[0], (
++            row_start, num_rows, self.w_shape)
++        self.w_off += row_start * dim
++        self.s_off += row_start * self.sb
++        self.row_start = row_start
++        self.num_rows = num_rows
++        self.threads = _KAI_THREADS
++        self.chunk = _KAI_CHUNK
++        self.pool = _kai_pool()  # shared by all tables (was one pool per table)
+         logger.info(
+-            "Engram DISK mode: layer %d rows read from %s (off=%d) and %s (off=%d); "
++            "Engram DISK mode: layer %d rows [%d, %d) read from %s (off=%d) and %s (off=%d); "
+             "%d threads, chunk %d",
+-            layer_id, weight_map[wname], self.w_off, weight_map[sname], self.s_off,
+-            self.threads, self.chunk,
++            layer_id, row_start, row_start + num_rows, weight_map[wname], self.w_off,
++            weight_map[sname], self.s_off, self.threads, self.chunk,
+         )
+ 
+     @staticmethod
+@@ -735,40 +810,53 @@
+         return fd, 8 + n + start, tuple(meta["shape"])
+ 
+     def _read_rows(self, fd: int, base: int, rel: list, row_bytes: int, buf) -> None:
+-        def work(lo: int, hi: int) -> None:
+-            for i in range(lo, hi):
+-                off = base + rel[i] * row_bytes
+-                view = buf[i * row_bytes : (i + 1) * row_bytes]
+-                got = 0
+-                while got < row_bytes:
+-                    n = _kai_os.preadv(fd, [view[got:]], off + got)
+-                    if n <= 0:
+-                        raise OSError("engram disk table: short read")
+-                    got += n
+-
+-        n = len(rel)
+-        if n <= self.chunk:
+-            work(0, n)
+-            return
+-        futs = [self.pool.submit(work, lo, min(lo + self.chunk, n)) for lo in range(0, n, self.chunk)]
+-        for fut in futs:
+-            fut.result()
+-
+-    def gather_dequant(self, rel: torch.Tensor, owned: torch.Tensor) -> torch.Tensor:
+-        """rel: [R] global row IDs into the full on-disk table; output is CPU bf16."""
+-        R = rel.numel()
+-        w = torch.empty((R, self.dim), dtype=torch.uint8, device="cpu")
+-        s = torch.empty((R, self.sb), dtype=torch.uint8, device="cpu")
+-        rel_l = rel.tolist()
+-        self._read_rows(self.w_fd, self.w_off, rel_l, self.dim, memoryview(w.numpy()).cast("B"))
+-        self._read_rows(self.s_fd, self.s_off, rel_l, self.sb, memoryview(s.numpy()).cast("B"))
+-        vals = w.view(torch.float8_e4m3fn).to(torch.float32).view(R, self.sb, -1)
++        _kai_parallel_read([(fd, base, rel, row_bytes, buf)])
++
++    def read_jobs(self, rel_l: list, w: torch.Tensor, s: torch.Tensor) -> list:
++        """Read jobs for rank-local rows `rel_l` into uint8 w [R, dim], s [R, sb]."""
++        return [
++            (self.w_fd, self.w_off, rel_l, self.dim, memoryview(w.numpy()).cast("B")),
++            (self.s_fd, self.s_off, rel_l, self.sb, memoryview(s.numpy()).cast("B")),
++        ]
++
++    def dequant(self, w: torch.Tensor, s: torch.Tensor) -> torch.Tensor:
++        """fp8 e4m3 rows (as uint8) x ue8m0 block scales -> [R, dim] fp32."""
++        R = w.shape[0]
++        vals = w.view(torch.float8_e4m3fn).to(torch.float32).view(
++            R, self.sb, self.dim // self.sb
++        )
+         # ue8m0 byte is the fp32 exponent field: 2^(e-127)
+         scale = (s.to(torch.int32) << 23).view(torch.float32)
+-        out = (vals * scale[:, :, None]).reshape(R, self.dim)
++        return (vals * scale[:, :, None]).reshape(R, self.dim)
++
++    def gather_dequant(self, rel: torch.Tensor, owned: torch.Tensor) -> torch.Tensor:
++        """rel: [R] int64 CPU local row ids; owned: [R] bool. Returns [R, dim] bf16 CPU."""
++        return gather_dequant_many([(self, rel, owned)])[0]
++
++
++def gather_dequant_many(requests: list) -> list[torch.Tensor]:
++    """Tech2Wild/Kai 2026-09-10: requests = [(DiskEngramTable, rel [R] int64 CPU,
++    owned [R] bool)] -> one [R, dim] bf16 CPU tensor per request. Rows are
++    de-duplicated per table (repeated n-grams, zero-filled dummy batches) and the
++    reads of every table go out in ONE parallel batch. Same math as before."""
++    plans, jobs = [], []
++    for table, rel, owned in requests:
++        if rel.device.type != "cpu" or owned.device.type != "cpu":
++            raise ValueError("Engram disk row indices and ownership must be on CPU")
++        uniq, inverse = torch.unique(rel, return_inverse=True)
++        if uniq.numel() and (int(uniq[0]) < 0 or int(uniq[-1]) >= table.num_rows):
++            raise IndexError("Engram row outside the backing table")
++        w = torch.empty((uniq.numel(), table.dim), dtype=torch.uint8, device="cpu")
++        s = torch.empty((uniq.numel(), table.sb), dtype=torch.uint8, device="cpu")
++        jobs += table.read_jobs(uniq.tolist(), w, s)
++        plans.append((table, w, s, inverse, owned))
++    _kai_parallel_read(jobs)
++    outs = []
++    for table, w, s, inverse, owned in plans:
++        out = table.dequant(w, s)[inverse]
+         out[~owned] = 0
+-        return out.to(torch.bfloat16)
+-
++        outs.append(out.to(torch.bfloat16))
++    return outs
+ 
+ 
+ class ParallelEngramEmbedding(nn.Module):
+@@ -932,26 +1020,29 @@
+             GRID=grid,
+         )
+ 
+-    def _disk_lookup(self, indices: torch.Tensor, out: torch.Tensor) -> None:
+-        """Host-side gather + dequant for DISK mode, then H2D into `out`
+-        ([T, local_heads, dim] bf16). Padded heads (beyond TOTAL_HEADS) and
+-        rows outside this rank's range write zeros, matching the kernel."""
+-        T = indices.shape[0]
+-        L = self.part_n_hash_cols
+-        ids = indices.detach().to("cpu", dtype=torch.int64)
+-        head_end = min(self.head_start + L, self.n_hash_cols)
+-        local = ids[:, self.head_start:head_end]
+-        if local.shape[1] < L:
+-            pad = torch.full((T, L - local.shape[1]), -1, dtype=torch.int64, device="cpu")
++    def disk_rel_owned(self, local: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
++        """CPU global row ids into a full local table, with non-owned rows masked."""
++        if local.device.type != "cpu":
++            raise ValueError("disk_rel_owned requires CPU indices")
++        if local.shape[1] < self.part_n_hash_cols:
++            pad = torch.full((local.shape[0], self.part_n_hash_cols-local.shape[1]),
++                             -1, dtype=torch.int64, device="cpu")
+             local = torch.cat([local, pad], dim=1)
+         rows = local.reshape(-1)
+         owned = (rows >= self.vocab_start_idx) & (rows < self.vocab_end_idx)
+-        # The backing safetensors contains the FULL table; address global rows.
+-        rel = torch.where(owned, rows, torch.zeros_like(rows))
++        # Our DiskEngramTable opens the FULL file at row_start=0 on every rank.
++        return torch.where(owned, rows, torch.zeros_like(rows)), owned
++
++    def _disk_lookup(self, indices: torch.Tensor, out: torch.Tensor) -> None:
++        if torch.cuda.is_current_stream_capturing():
++            raise RuntimeError("SSD Engram requires the V2 prestage hook for CUDA Graph")
++        count = indices.shape[0]
++        end = min(self.head_start + self.part_n_hash_cols, self.n_hash_cols)
++        local = indices[:, self.head_start:end].detach().to("cpu", dtype=torch.int64)
++        rel, owned = self.disk_rel_owned(local)
+         assert self.disk is not None
+-        deq = self.disk.gather_dequant(rel, owned)
+-        out[:T].copy_(deq.view(T, L, self.dim))
+-
++        values = self.disk.gather_dequant(rel, owned)
++        out[:count].copy_(values.view(count, self.part_n_hash_cols, self.dim))
+ 
+     def forward(self, indices: torch.Tensor) -> torch.Tensor:
+         """indices: [num_tokens, n_hash_cols] -> [num_tokens, n_hash_cols, dim]
+@@ -1192,7 +1283,15 @@
+         max_tokens = vllm_config.scheduler_config.max_num_batched_tokens
+         # Keep lookup results alive across breakable graph segments. A table
+         # shared by DP replicas stages every replica's tokens at once.
+-        self.staged_rows = torch.empty(
++        # Port the community graph-safe SSD staging onto official 0909 without
++        # replacing its DP/ubatch implementation. This optimization is DP1 only.
++        self.prestage = self.embed_tokens.disk is not None and bool(
++            getattr(vllm_config, "use_v2_model_runner", False)
++        )
++        if self.prestage and (self.embed_tokens.dp_size != 1 or
++                              vllm_config.parallel_config.use_ubatching):
++            raise ValueError("SSD Engram graph prestaging currently requires DP1 and one ubatch")
++        self.staged_rows = torch.zeros(
+             max_tokens * self.embed_tokens.dp_size,
+             self.embed_tokens.part_n_hash_cols,
+             layout.head_dim,
+@@ -1216,6 +1315,8 @@
+         `hash_ids` covers every DP replica sharing the table (see
+         `gather_engram_hashes`), so only `embed` narrows back to this one.
+         """
++        if self.prestage:
++            return  # ModelState has staged the actual rows before this forward.
+         rows = self._staged_rows_for_ubatch()[: hash_ids.shape[0]]
+         assert rows.shape[0] == hash_ids.shape[0], "engram staging buffer too small"
+         self.embed_tokens.lookup(hash_ids, rows)
+@@ -1322,3 +1423,107 @@
+             num_warps=num_warps,
+         )
+         return output
++
++
++class EngramDiskStager:
++    """Tech2Wild/Kai 2026-09-10 (CUDA graphs): stage DISK-mode Engram rows
++    OUTSIDE the model forward.
++
++    The V2 model state calls :meth:`stage` from ``prepare_inputs`` once per
++    step, after the runner has written this step's input ids, positions and
++    query_start_loc (all on the current stream). It hashes the step on the GPU
++    (same kernel, same inputs as the forward), copies only this rank's hash
++    columns to pinned host memory, waits on ONE event, reads every row of every
++    engram layer in one parallel batch, dequantizes on the CPU exactly like the
++    in-forward path, and copies (async, from pinned memory) into each layer's
++    persistent ``staged_rows``. The forward (eager, breakable PIECEWISE or FULL
++    graph) only reads ``staged_rows``, so it never needs the host.
++    """
++
++    def __init__(self, hash_state: NgramHashState, engrams: list["Engram"]) -> None:
++        assert engrams and all(e.embed_tokens.disk is not None for e in engrams)
++        self.hash_state = hash_state
++        self.engrams = sorted(engrams, key=lambda e: e.layer_hash_index)
++        emb = self.engrams[0].embed_tokens
++        self.local_heads = emb.part_n_hash_cols
++        self.head_start = emb.head_start
++        self.head_end = min(emb.head_start + emb.part_n_hash_cols, emb.n_hash_cols)
++        self.dim = emb.dim
++        self.max_tokens = self.engrams[0].staged_rows.shape[0]
++        num_layers = hash_state.multipliers.shape[0]
++        self.hash_host = torch.empty(
++            (self.max_tokens, num_layers, self.head_end - self.head_start),
++            dtype=torch.int32,
++            device="cpu",
++            pin_memory=True,
++        )
++        self.rows_host = [
++            torch.empty(
++                (self.max_tokens, self.local_heads, self.dim),
++                dtype=torch.bfloat16,
++                device="cpu",
++                pin_memory=True,
++            )
++            for _ in self.engrams
++        ]
++        self.hashes_ready = torch.cuda.Event()
++        self.num_staged = 0
++        logger.info(
++            "Engram DISK rows staged before the forward (graph-safe): %d layers, "
++            "heads [%d, %d) of %d, up to %d tokens/step, %d read threads",
++            len(self.engrams),
++            self.head_start,
++            self.head_end,
++            emb.n_hash_cols,
++            self.max_tokens,
++            _KAI_THREADS,
++        )
++
++    @torch.inference_mode()
++    def stage(
++        self,
++        input_ids: torch.Tensor,
++        positions: torch.Tensor,
++        query_start_loc: torch.Tensor,
++        lookback_token_ids: torch.Tensor,
++        num_tokens: int,
++    ) -> int:
++        """Stage rows for the first `num_tokens` (unpadded) tokens of this step.
++        Returns the number staged; 0 while the KV cache is unbound (profiling),
++        matching the forward, which skips engram then."""
++        n = int(num_tokens)
++        if n > self.max_tokens:
++            raise ValueError("Engram prestage exceeds the persistent buffer")
++        if n <= 0 or not self.hash_state.ensure_cache():
++            return 0
++        from .mm_preprocess import image_sentinel_mask
++
++        ids = input_ids[:n]
++        hashes = self.hash_state(
++            ids,
++            positions[:n],
++            query_start_loc,
++            image_sentinel_mask(ids),
++            lookback_token_ids,
++            image_sentinel_mask(lookback_token_ids),
++            None,
++            None,
++        )
++        host = self.hash_host[:n]
++        host.copy_(hashes[:, :, self.head_start : self.head_end], non_blocking=True)
++        self.hashes_ready.record()
++        # The one host sync per step. It also orders this step's rewrite of the
++        # pinned buffers after the previous step's async H2D copies from them.
++        self.hashes_ready.synchronize()
++        requests = []
++        for engram in self.engrams:
++            local = host[:, engram.layer_hash_index, :].to(torch.int64)
++            rel, owned = engram.embed_tokens.disk_rel_owned(local)
++            requests.append((engram.embed_tokens.disk, rel, owned))
++        rows_per_layer = gather_dequant_many(requests)
++        for engram, rows, buf in zip(self.engrams, rows_per_layer, self.rows_host):
++            staged = buf[:n]
++            staged.copy_(rows.view(n, self.local_heads, self.dim))
++            engram.staged_rows[:n].copy_(staged, non_blocking=True)
++        self.num_staged = n
++        return n
+--- official/model_state.py
++++ optimized/model_state.py
+@@ -6,6 +6,11 @@
+ import torch.nn as nn
+ 
+ from vllm.config import VllmConfig
++from vllm.models.deepseek_v4_1.common.engram import (
++    Engram,
++    EngramDiskStager,
++    NgramHashState,
++)
+ from vllm.triton_utils import tl, triton
+ from vllm.v1.worker.gpu.input_batch import InputBatch
+ from vllm.v1.worker.gpu.mm.encoder_cache import EncoderCache
+@@ -67,6 +72,17 @@
+                 (self.max_num_reqs, depth), -1, dtype=torch.int32, device=device
+             )
+ 
++        # Tech2Wild/Kai 2026-09-10 (CUDA graphs): DISK-backed Engram rows are
++        # staged in prepare_inputs, outside the (possibly captured) forward.
++        self.engram_stager: EngramDiskStager | None = None
++        engrams = [m for m in model.modules() if isinstance(m, Engram) and m.prestage]
++        if engrams:
++            hash_states = [m for m in model.modules() if isinstance(m, NgramHashState)]
++            assert len(hash_states) == 1, (
++                f"expected one NgramHashState, found {len(hash_states)}"
++            )
++            self.engram_stager = EngramDiskStager(hash_states[0], engrams)
++
+     def prepare_inputs(
+         self, input_batch: InputBatch, req_states: RequestState
+     ) -> dict[str, torch.Tensor | None]:
+@@ -87,6 +103,17 @@
+             BLOCK_DEPTH=triton.next_power_of_2(depth),
+         )
+         model_inputs["lookback_token_ids"] = window
++        if self.engram_stager is not None and input_batch.input_ids is not None:
++            # After the runner wrote this step's ids/positions/query_start_loc
++            # and the lookback window above; before the forward / graph replay.
++            positions = model_inputs.get("positions")
++            self.engram_stager.stage(
++                input_batch.input_ids,
++                positions if positions is not None else input_batch.positions,
++                input_batch.query_start_loc[: input_batch.num_reqs + 1],
++                window,
++                input_batch.num_tokens,
++            )
+         return model_inputs
+ 
+     def prepare_dummy_inputs(self, num_reqs: int, num_tokens: int) -> dict[str, Any]:

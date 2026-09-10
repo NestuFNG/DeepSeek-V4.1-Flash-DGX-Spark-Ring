@@ -1,0 +1,157 @@
+{
+  "passed": true,
+  "turns": [
+    {
+      "name": "tool_turn_0",
+      "usage": {
+        "prompt_tokens": 425,
+        "total_tokens": 530,
+        "completion_tokens": 105,
+        "completion_tokens_details": {
+          "reasoning_tokens": 63
+        }
+      },
+      "finish_reason": "tool_calls",
+      "response": "",
+      "reasoning": "The user wants me to look up SKU A17's inventory record, then multiply inventory count by unit price using the multiply tool, and report back in Chinese: stock count, unit price, total price, and record version.\n\nFirst, look up the record. Then multiply. Let me start with the lookup.",
+      "tool_calls": [
+        {
+          "id": "chatcmpl-tool-ba4ffddf6ba67cf8",
+          "type": "function",
+          "function": {
+            "name": "lookup_test_record",
+            "arguments": "{\"sku\": \"A17\"}"
+          }
+        }
+      ],
+      "elapsed_seconds": 2.6230483490071492,
+      "ttft_seconds": 0.781351020996226,
+      "first_answer_seconds": null,
+      "max_output_tokens": 262144,
+      "thinking": true,
+      "reasoning_effort": "max",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "client_decode_tps": 56.46964808941894,
+      "explicit_thinking_flags": true
+    },
+    {
+      "name": "tool_turn_1",
+      "usage": {
+        "prompt_tokens": 572,
+        "total_tokens": 644,
+        "completion_tokens": 72,
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      },
+      "finish_reason": "tool_calls",
+      "response": "",
+      "reasoning": "Now multiply stock (18) by unit price (375) = 6750.",
+      "tool_calls": [
+        {
+          "id": "chatcmpl-tool-a4a4258080e0a0f1",
+          "type": "function",
+          "function": {
+            "name": "multiply",
+            "arguments": "{\"a\": 18, \"b\": 375}"
+          }
+        }
+      ],
+      "elapsed_seconds": 1.846301311001298,
+      "ttft_seconds": 0.8287806189910043,
+      "first_answer_seconds": null,
+      "max_output_tokens": 262144,
+      "thinking": true,
+      "reasoning_effort": "max",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "client_decode_tps": 69.77745077569561,
+      "explicit_thinking_flags": true
+    },
+    {
+      "name": "tool_turn_2",
+      "usage": {
+        "prompt_tokens": 661,
+        "total_tokens": 695,
+        "completion_tokens": 34,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "stop",
+      "response": "SKU A17：库存 18 件，单价 375 分，总价 6750 分，记录版本 VX-207。",
+      "reasoning": "",
+      "tool_calls": [],
+      "elapsed_seconds": 3.949236918997485,
+      "ttft_seconds": 3.5207427510031266,
+      "first_answer_seconds": 3.5207427510031266,
+      "max_output_tokens": 262144,
+      "thinking": true,
+      "reasoning_effort": "max",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "client_decode_tps": 77.01388365321804,
+      "explicit_thinking_flags": true
+    }
+  ],
+  "seen": [
+    "lookup_test_record",
+    "multiply"
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are validating read-only tools on synthetic inventory. Use actual tool responses, preserve exact integer arithmetic, and answer concisely."
+    },
+    {
+      "role": "user",
+      "content": "查询 SKU A17 的库存和单价，再调用 multiply 算全部库存的总价（单位分）。最后用一句中文告诉我库存数、单价、总价和记录版本。"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "reasoning": "The user wants me to look up SKU A17's inventory record, then multiply inventory count by unit price using the multiply tool, and report back in Chinese: stock count, unit price, total price, and record version.\n\nFirst, look up the record. Then multiply. Let me start with the lookup.",
+      "tool_calls": [
+        {
+          "id": "chatcmpl-tool-ba4ffddf6ba67cf8",
+          "type": "function",
+          "function": {
+            "name": "lookup_test_record",
+            "arguments": "{\"sku\": \"A17\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "chatcmpl-tool-ba4ffddf6ba67cf8",
+      "content": "{\"sku\": \"A17\", \"stock\": 18, \"unit_price_cents\": 375, \"version\": \"VX-207\"}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "reasoning": "Now multiply stock (18) by unit price (375) = 6750.",
+      "tool_calls": [
+        {
+          "id": "chatcmpl-tool-a4a4258080e0a0f1",
+          "type": "function",
+          "function": {
+            "name": "multiply",
+            "arguments": "{\"a\": 18, \"b\": 375}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "chatcmpl-tool-a4a4258080e0a0f1",
+      "content": "{\"result\": 6750}"
+    },
+    {
+      "role": "assistant",
+      "content": "SKU A17：库存 18 件，单价 375 分，总价 6750 分，记录版本 VX-207。",
+      "reasoning": ""
+    }
+  ]
+}

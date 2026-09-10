@@ -1,0 +1,26 @@
+[
+  {
+    "destination": "models/deepseek_v4_1/attention.py",
+    "file": "attention.py",
+    "original_sha256": "ef13a8503b54172a63cca6932e2ee5a6d5d6ced81445949067f01b3f61ab6e5e",
+    "patched_sha256": "bd6fd3b6308a584eef95211a8373ab15eb66fcb84dd348e82a64f725f08d8616"
+  },
+  {
+    "destination": "models/deepseek_v4_1/nvidia/flashinfer_sparse.py",
+    "file": "flashinfer_sparse.py",
+    "original_sha256": "19c8c2ebcffacd2e8fc370c005c7a2b619585597dfc1152e8010c7fecfd215c1",
+    "patched_sha256": "aaf1abd54440ab7c80ea3385359c3c7e643a767c2b78201e5a7c2a9423966690"
+  },
+  {
+    "destination": "v1/attention/backends/mla/sparse_swa.py",
+    "file": "sparse_swa.py",
+    "original_sha256": "cc4c5f3d5dd914ce05f491b03b3bd7c45ba532bd7e566e2b12af348768acecbe",
+    "patched_sha256": "631e667b9807b126fca18eaa4358c0c6dab2f66d8fe66d6b7fa76e254dd00615"
+  },
+  {
+    "destination": "model_executor/layers/sparse_attn_indexer.py",
+    "file": "sparse_attn_indexer.py",
+    "original_sha256": "5b094c4280ea615eb79db26734dd8633978bed1cc1189cf278e6a229894900a4",
+    "patched_sha256": "2c69c3110fe02a9cfd780fdb3a73c81a379eac235ff58d8736f8cb8f6c600b48"
+  }
+]

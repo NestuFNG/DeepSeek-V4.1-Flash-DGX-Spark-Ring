@@ -1,0 +1,30 @@
+[
+  {
+    "name": "flashinfer",
+    "revision": "07869c61ba581e6d6b8ad8d142f4a6c89b707cc1",
+    "url": "https://codeload.github.com/flashinfer-ai/flashinfer/tar.gz/07869c61ba581e6d6b8ad8d142f4a6c89b707cc1",
+    "bytes": 22566629,
+    "sha256": "8f588be5ede62f7ad4da9b0a1291749b8b93b28794420210aed95545ea229e10"
+  },
+  {
+    "name": "cutlass",
+    "revision": "b46b16d003484063bca4ed365e44095c4c6ed633",
+    "url": "https://codeload.github.com/NVIDIA/cutlass/tar.gz/b46b16d003484063bca4ed365e44095c4c6ed633",
+    "bytes": 39386118,
+    "sha256": "eb32d2231412541cdaefedf82827903360b07762a0c8d554ca10a59951b321d0"
+  },
+  {
+    "name": "cccl",
+    "revision": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+    "url": "https://codeload.github.com/NVIDIA/cccl/tar.gz/16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+    "bytes": 12368664,
+    "sha256": "8c4a1bebc5dfefaebbd40f21460951c62403f9c1f7c52b151b99cae82a02c844"
+  },
+  {
+    "name": "spdlog",
+    "revision": "c3aed4b68373955e1cc94307683d44dca1515d2b",
+    "url": "https://codeload.github.com/gabime/spdlog/tar.gz/c3aed4b68373955e1cc94307683d44dca1515d2b",
+    "bytes": 269972,
+    "sha256": "206184e0d3be5b4ea56343dca519d38d1fdf567b59dd9913e3e959ed4c6b0f4d"
+  }
+]

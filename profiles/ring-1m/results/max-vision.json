@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "case": {
+    "name": "default_max_vision",
+    "usage": {
+      "prompt_tokens": 249,
+      "total_tokens": 298,
+      "completion_tokens": 49,
+      "completion_tokens_details": {
+        "reasoning_tokens": 37
+      }
+    },
+    "finish_reason": "stop",
+    "response": "左边是红色的圆形，右边是蓝色的方形。",
+    "reasoning": "我们需要回答用户中文问题。需要简洁。图片左边红色圆形，右边蓝色方形。用中文回答：左边是红色的圆形，右边是蓝色的方形。需要简洁。最终。",
+    "tool_calls": [],
+    "elapsed_seconds": 3.9436737729993183,
+    "ttft_seconds": 2.030703636992257,
+    "first_answer_seconds": 3.8717521769867744,
+    "max_output_tokens": 262144,
+    "thinking": true,
+    "reasoning_effort": "max",
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "client_decode_tps": 25.091871062969286,
+    "explicit_thinking_flags": false
+  }
+}

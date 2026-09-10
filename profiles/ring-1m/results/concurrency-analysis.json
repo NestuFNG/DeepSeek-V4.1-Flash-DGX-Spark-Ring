@@ -1,0 +1,26 @@
+{
+  "batch_seconds": 180.160610713996,
+  "batch_output_tokens": 13551,
+  "reasoning_tokens": 11851,
+  "reasoning_share": 0.8745480038373552,
+  "whole_batch_output_tps": 75.21621927399069,
+  "approx_seconds_by_active_count": {
+    "0": 1.0700857639312744,
+    "6": 52.16786813735962,
+    "5": 10.21858525276184,
+    "4": 4.090700626373291,
+    "3": 3.0666732788085938,
+    "2": 82.19182205200195,
+    "1": 26.793514728546143
+  },
+  "continuous_six_active_window": {
+    "seconds": 51.124507188797,
+    "tokens": 5138.0,
+    "output_tps": 100.49974625722943,
+    "accepted_plus_bonus_per_request_step": 3.503754266211604,
+    "approx_batch_step_ms": 209.38364718961228
+  },
+  "accepted_plus_bonus_per_request_step": 3.5362734864300625,
+  "preemptions": 0.0,
+  "measurement_note": "1-second server counter samples. Full-window throughput includes thinking tokens. Step-time estimate is not a GPU profiler measurement."
+}

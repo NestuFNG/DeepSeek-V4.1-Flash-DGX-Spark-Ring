@@ -1,1 +1,17 @@
 .DS_Store
+
+# Local Ring deployment data
+node.env
+*.local.env
+local-results/
+profiles/ring-1m/**/local-*/
+profiles/ring-1m/build/flashinfer/*.tar.gz
+profiles/ring-1m/build/nccl/source/
+profiles/ring-1m/build/nccl/output/
+__pycache__/
+*.pyc
+*.pem
+*.key
+*.safetensors
+*.so
+*.so.*

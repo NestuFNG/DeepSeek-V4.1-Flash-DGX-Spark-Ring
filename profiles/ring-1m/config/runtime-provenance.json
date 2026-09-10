@@ -1,0 +1,33 @@
+{
+  "profile": "ring-1m-max-c6",
+  "upstream_fork_base": "ca662ac35193c69ace9cee37f13a94abf2eff0fc",
+  "graph_patch_reference": "6d034c2bfa44c711ef7a737a4fc19348d082e197",
+  "live_source_sha256_before_publication_comments": {
+    "runtime/graph-patches/engram.py": "4bf89eca2aa2b5656b8d53c0344f01ccf699d3fa528ba90d90e082415405f716",
+    "runtime/graph-patches/model_state.py": "8cf3ff42fa9993a6539b26dc5ff0ca525df13192ce9b266a0519a238bbdffbcd",
+    "runtime/memory-patches/indexer.py": "6612edab9223e12d2a73a455ab794649f0bca92cfe544852b904dd378395e711",
+    "build/base/engram.py": "86388b5f49cbb7fa5eb442082c1d2582837bb58e05cbe8a8707fd41cbacba45e",
+    "build/base/weight_utils.py": "6ad34626eec89f69257d211e17c02191eeec180782cdd388169843e3b0000701",
+    "build/flashinfer/patches/attention.py": "638c06f0f2cf1176a7dac5877aed328923df88ca3b97c50b40e45ee09d7fff7b",
+    "build/flashinfer/patches/flashinfer_sparse.py": "ab7712f977aa59db6e357310f20e38e1a506170a61ebaa6a2495d59d8a07ccc3",
+    "build/flashinfer/patches/sparse_attn_indexer.py": "8a8a1502357e11204a8ce49f207c70cd2b888518a1cea7c49790adb57aeac517",
+    "build/flashinfer/patches/sparse_swa.py": "356b4693d174ee5bd714275be96422d542bfd6f18139693ed4e3000b4e240f34"
+  },
+  "nccl_version": "2.30.7",
+  "nccl_commit": "73cf112295c33aee2b895f329f592f2a9b4b0f97",
+  "nccl_live_library_sha256": "8733af78fa1bff0bf495bc0ba55928580327fd9696563dba265c66b222faf620",
+  "nccl_patch_repository": "FujitsuPolycom/sparkring",
+  "nccl_patch_commit": "b70e127e8bda797e38afd9a1cefe1eb3ca790d2f",
+  "vllm": "0.1.dev20904+g179dd0fa9",
+  "torch": "2.13.0+cu130",
+  "flashinfer": "0.7.0rc1",
+  "context_limit": 1048576,
+  "max_num_seqs": 6,
+  "kv_bytes_per_node": 17179869184,
+  "reported_logical_token_capacity": 4909644,
+  "kv_dtype_effective": "fp8_ds_mla",
+  "indexer_dtype": "FP8",
+  "thinking": true,
+  "reasoning_effort": "max",
+  "scope": "Live settings and kernels validated on four Sparks; public scripts are path-parameterized and syntax-tested, not a second clean-machine installation."
+}

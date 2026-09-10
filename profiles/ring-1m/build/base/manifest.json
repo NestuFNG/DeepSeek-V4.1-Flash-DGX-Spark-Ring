@@ -1,0 +1,10 @@
+{
+  "official_arm64_manifest": "sha256:d84a123255b822fc22508635218000187221794f59c0694c33b0650d1e377d58",
+  "community_reference_commit": "38d9c3986d9477e7a1653b7c38b7c5d52298cd9e",
+  "original_engram_sha256": "41c5bdf25cf8337088247be768e3d43fa41e6358397800f8b602ebf1ede69480",
+  "patched_engram_sha256": "115ba1966add78acdeda1d5df8991e9d2f5d0d747844ec4b4cf0c75ecb6d7fe5",
+  "original_weight_utils_sha256": "494b07cd6b4e4fb40314dec1d0e0c3b433fe62a135a3a9d6d9e4058059054e4a",
+  "patched_weight_utils_sha256": "3308560a6fd4d8876ed3d7aae80f031f806f507d1ca318fe71f05ee3607b81d0",
+  "mode": "full original safetensors tables, global file-row offsets, explicit CPU staging; eager mode",
+  "preserved": "Official 0909 DP sharding, dummy_hashes, ubatch staging, gather/select helpers and forward methods"
+}
