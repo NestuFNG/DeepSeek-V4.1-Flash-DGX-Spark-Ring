@@ -1,11 +1,11 @@
 # patch/: the files bind-mounted over the vLLM image
 
-The top-level files here are byte-identical to what the serving boot (boot 8) mounts from `~/patches/dsv41-boot3/`
-on every node. `mounts.txt` maps each file to its site-packages path (`/usr/local/lib/python3.12/dist-packages/vllm/<path>`).
+The top-level files here are byte-identical to what the serving boot (boot 10) mounts from `~/patches/dsv41-boot10/`
+on every node. Boots 3-9 mounted `~/patches/dsv41-boot3/`: the same files, except `engram.py` was md5 0ae8f1a5 there. `mounts.txt` maps each file to its site-packages path (`/usr/local/lib/python3.12/dist-packages/vllm/<path>`).
 
 | file | md5 | mounted over | fix |
 |---|---|---|---|
-| `engram.py` | 0ae8f1a5 | `models/deepseek_v4_1/common/engram.py` | Engram tables on disk, rank-offset fix, one shared parallel read pool, `EngramDiskStager` |
+| `engram.py` | c0329107 | `models/deepseek_v4_1/common/engram.py` | Engram tables on disk, rank-offset fix, one shared parallel read pool, `EngramDiskStager`, optional node-local rows (`DSV41_ENGRAM_DIR`, used only when the copied row range covers the rank) |
 | `model_state.py` | 0a14bee6 | `models/deepseek_v4_1/nvidia/model_state.py` | Engram rows staged in `prepare_inputs`, before the (CUDA-graph captured) forward |
 | `weight_utils.py` | 7e1027f1 | `model_executor/model_loader/weight_utils.py` | loader skips the two Engram tables |
 | `attention.py` | da9ef196 | `models/deepseek_v4_1/attention.py` | SM12x page sizes (Kai) + indexer cache pages of 64 states |

@@ -682,6 +682,31 @@ def _kai_parallel_read(jobs: list) -> None:
         fut.result()
 
 
+def _dsv41_engram_local_dir(model_dir: str, layer_id: int, row_start: int, num_rows) -> str:
+    """Tech2Wild 2026-09-10: node-local Engram rows. DSV41_ENGRAM_DIR points at a sparse copy
+    of the Engram shards holding only this rank's rows at the original byte offsets, plus
+    engram-local.json with the copied row range per layer (tools/engram_local.py). It is used
+    only when that range covers this table's rows; otherwise the table reads model_dir as before,
+    so a changed rank map can never read the copy's empty holes."""
+    local = _kai_os.environ.get("DSV41_ENGRAM_DIR", "")
+    if not local:
+        return model_dir
+    try:
+        with open(_kai_os.path.join(local, "engram-local.json")) as f:
+            lo, hi = _kai_json.load(f)["layers"][str(layer_id)]
+    except Exception as e:  # noqa: BLE001
+        logger.warning("DSV41_ENGRAM_DIR=%s unusable for layer %d (%s); reading %s",
+                       local, layer_id, e, model_dir)
+        return model_dir
+    if num_rows is None or not (lo <= row_start and row_start + num_rows <= hi):
+        logger.warning("DSV41_ENGRAM_DIR=%s holds layer %d rows [%d, %d), this rank needs "
+                       "[%d, +%s); reading %s", local, layer_id, lo, hi, row_start, num_rows, model_dir)
+        return model_dir
+    logger.info("Engram layer %d rows [%d, %d) read from node-local %s",
+                layer_id, row_start, row_start + num_rows, local)
+    return local
+
+
 class DiskEngramTable:
     """Tech2Wild/Kai 2026-09-10: read Engram rows straight from the safetensors
     shards with positional preads on a thread pool, so the per-rank Engram
@@ -701,6 +726,7 @@ class DiskEngramTable:
         row_start: int = 0,
         num_rows: int | None = None,
     ):
+        model_dir = _dsv41_engram_local_dir(model_dir, layer_id, row_start, num_rows)
         idx_path = _kai_os.path.join(model_dir, "model.safetensors.index.json")
         with open(idx_path) as f:
             weight_map = _kai_json.load(f)["weight_map"]

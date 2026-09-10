@@ -64,7 +64,8 @@ esac
 # ---- preflight ----
 test -f "$MODEL_HOST/config.json" || { echo "MODEL MISSING at $MODEL_HOST" >&2; exit 3; }
 test -f "$MODEL_HOST/model-00048-of-00048.safetensors" || { echo "MODEL INCOMPLETE at $MODEL_HOST (shard 48 missing)" >&2; exit 3; }
-PATCH_DIR="${PATCH_DIR:-$HOME/patches/dsv41-boot3}"
+# PATCH_NAME is resolved per node (each rank has its own $HOME); boot_dsv41.sh forwards it.
+PATCH_DIR="${PATCH_DIR:-$HOME/patches/${PATCH_NAME:-dsv41-boot3}}"
 PATCH_MOUNTS=""
 if [ -f "$PATCH_DIR/mounts.txt" ]; then
   # manifest: "<file> <site-relative path>" per line; ENGRAM_DISK=0 skips the engram files
@@ -81,6 +82,14 @@ if [ "$ENGRAM_DISK" = "1" ]; then
   ENGRAM_ENV="-e DSV41_ENGRAM_DISK=1 -e DSV41_ENGRAM_DISK_THREADS=${ENGRAM_THREADS:-32} -e DSV41_ENGRAM_DISK_CHUNK=${ENGRAM_CHUNK:-16}"
 else
   ENGRAM_ENV="-e DSV41_ENGRAM_DISK=0"
+fi
+# Node-local Engram rows (tools/engram_local.py): mounted only where this node holds a copy.
+# engram.py checks the copy's row range against this rank's rows and otherwise reads MODEL_HOST.
+ENGRAM_LOCAL_HOST="${ENGRAM_LOCAL_HOST:-/var/tmp/engram-local/$MODEL_DIR}"
+ENGRAM_LOCAL_MOUNT=""
+if [ "$ENGRAM_DISK" = "1" ] && [ "${ENGRAM_LOCAL:-0}" = "1" ] && [ -f "$ENGRAM_LOCAL_HOST/engram-local.json" ]; then
+  ENGRAM_LOCAL_MOUNT="-v $ENGRAM_LOCAL_HOST:/engram-local:ro"
+  ENGRAM_ENV="$ENGRAM_ENV -e DSV41_ENGRAM_DIR=/engram-local"
 fi
 mkdir -p "$CACHE_HOST_PATH"
 docker rm -f "$NAME" 2>/dev/null || true
@@ -124,7 +133,7 @@ docker run --gpus all -d --name "$NAME" --restart no \
   --oom-score-adj 500 \
   -v "$MODEL_HOST:/models/$MODEL_DIR:ro" \
   -v "$CACHE_HOST_PATH:/cache" \
-  $PATCH_MOUNTS \
+  $PATCH_MOUNTS $ENGRAM_LOCAL_MOUNT \
   -e VLLM_HOST_IP=$HOST_IP -e HF_HOME=/cache/huggingface -e HF_HUB_OFFLINE=1 -e TRANSFORMERS_OFFLINE=1 \
   -e VLLM_CACHE_ROOT="/cache/vllm-$EXP_NAME" \
   -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
@@ -149,6 +158,6 @@ docker run --gpus all -d --name "$NAME" --restart no \
     --distributed-executor-backend mp --nnodes 4 --node-rank "$NODE_RANK" \
     --master-addr "$HEAD_IP" --master-port "$MPORT" $HEADLESS $VLLM_EXTRA
 
-echo "launched $NAME rank=$NODE_RANK exp=$EXP_NAME image=$IMAGE patches=$PATCH_DIR gmu=$GMU maxlen=$MAXLEN seqs=$SEQS eager=$EAGER cg=${CUDAGRAPH_MODE}[${CG_SIZES}] spec=$SPEC adapt=$SPEC_ADAPT engram_disk=$ENGRAM_DISK text_only=$TEXT_ONLY avail=${AVAIL_GB}GiB"
+echo "launched $NAME rank=$NODE_RANK exp=$EXP_NAME image=$IMAGE patches=$PATCH_DIR gmu=$GMU maxlen=$MAXLEN seqs=$SEQS eager=$EAGER cg=${CUDAGRAPH_MODE}[${CG_SIZES}] spec=$SPEC adapt=$SPEC_ADAPT engram_disk=$ENGRAM_DISK engram_local=${ENGRAM_LOCAL_MOUNT:+yes} text_only=$TEXT_ONLY avail=${AVAIL_GB}GiB"
 sleep 3
 docker ps --format '{{.Names}} {{.Status}}' | grep "$NAME" || { echo "$NAME exited" >&2; docker logs --tail 40 "$NAME" >&2; exit 1; }

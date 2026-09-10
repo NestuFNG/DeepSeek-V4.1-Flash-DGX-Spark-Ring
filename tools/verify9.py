@@ -20,6 +20,13 @@ for run in (1, 2):
     nums = [int(x) for x in (r["choices"][0]["message"]["content"] or "").split() if x.isdigit()]
     print(f"count run{run}: {ct} tok / {dt:.2f}s = {ct / dt:.1f} tok/s | correct 1..100: {nums[:100] == list(range(1, 101))}", flush=True)
 
+CODE = ("Write a Python function merge_intervals(intervals) that merges overlapping intervals and returns them sorted. "
+        "Include a one-line docstring and two example calls.")
+for run in (1, 2):
+    r, dt = post({"model": M, "messages": [{"role": "user", "content": f"[code {run}] " + CODE}], "max_tokens": 200, "temperature": 0})
+    ct = r["usage"]["completion_tokens"]
+    print(f"code run{run} (bench v1 coding prompt, non-streaming): {ct} tok / {dt:.2f}s = {ct / dt:.1f} tok/s", flush=True)
+
 tools = [{"type": "function", "function": {"name": "get_weather", "description": "Get the current weather for a city",
           "parameters": {"type": "object", "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["c", "f"]}},
                          "required": ["city"]}}}]

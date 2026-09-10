@@ -55,7 +55,7 @@ Build each image on every node; they are node-local.
 
 ## 4. Patches (bind-mounted over the image; nothing baked)
 
-Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-boot3/` on every node. The launcher mounts each file over the site-packages path the manifest gives. `tools/prelaunch-8.sh` does this with md5 checks. The top-level `patch/` files are byte-identical to what the serving boot mounts; `patch/README.md` lists their md5s, and the subfolders hold each fix's diff and test.
+Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-boot10/` on every node (the launcher reads `~/patches/$PATCH_NAME`; boots 3-9 used `dsv41-boot3`, the same files with the previous `engram.py`). The launcher mounts each file over the site-packages path the manifest gives. `tools/prelaunch-8.sh` does this with md5 checks. The top-level `patch/` files are byte-identical to what the serving boot mounts; `patch/README.md` lists their md5s, and the subfolders hold each fix's diff and test.
 
 | file (repo) | mounted over (`vllm/...`) | what it does |
 |---|---|---|
@@ -72,7 +72,11 @@ Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-b
 - `launch/dsv41-tp4.sh <rank>` starts one rank.
 - `launch/boot_dsv41.sh` (run on any node with SSH to the others) starts ranks 3, 2 and 1, then the head, with identical knobs.
 - `tools/launch.sh <N>` wraps it. It **stops `vllm_dsv41` on every node first, head first**, runs `/root/prelaunch-<N>.sh` if present, then runs `launch/boot<N>-go.sh`. Stopping everything first matters: a new worker that starts while an old head is still listening on the same port joins that head's rendezvous and hangs the new boot.
-- The serving configuration is `launch/boot9-go.sh`.
+- The serving configuration is `launch/boot10-go.sh` (`PATCH_NAME=dsv41-boot10`, `ENGRAM_LOCAL=1`).
+- **Node-local Engram rows (boot 10).** Before that boot, run `tools/engram_local.py` once on each worker, reading from the NFS mount and writing to `/var/tmp/engram-local/DeepSeek-V4.1-Flash`.
+  - Pass the rank's row ranges, taken from the boot log line `Engram DISK mode: layer L rows [start, end)`. Example for rank 1: `1:96000564:192001740 14:96003054:192007016`.
+  - Each worker needs about 48 GB of local disk. The script verifies random rows against the source.
+  - `ENGRAM_LOCAL=1` mounts the copy. `patch/engram.py` uses it only when its recorded range covers the rank, and falls back to NFS otherwise. The head already reads from local disk.
 
 Flags and environment that matter, and why:
 
