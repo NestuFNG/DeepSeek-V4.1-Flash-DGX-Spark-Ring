@@ -970,6 +970,21 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
         return source.kv_cache
 
 
+def _dsv41_indexer_sm12x() -> bool:
+    from vllm.platforms import current_platform
+
+    return current_platform.is_cuda() and current_platform.is_device_capability_family(120)
+
+
+class DeepseekV4IndexerSM12xBackend(DeepseekV4IndexerBackend):
+    """Tech2Wild 2026-09-10: SM12x indexer pages hold 64 states (64 tokens at
+    compress ratio 1, 128 at ratio 2), so both sizes are kernel block sizes."""
+
+    @staticmethod
+    def get_supported_kernel_block_sizes() -> list[int]:
+        return [128, 64]
+
+
 class DeepseekV4IndexerCache(torch.nn.Module, AttentionLayerBase):
     def __init__(
         self,
@@ -999,8 +1014,14 @@ class DeepseekV4IndexerCache(torch.nn.Module, AttentionLayerBase):
         # head_dim already carries the fp8 scale padding
         # tokens_per_state=1 for V3.2, >1 for DeepseekV4; same cache layout.
         uses_fp8_ds_mla_layout = vllm_config.cache_config.cache_dtype == "fp8_ds_mla"
+        # Tech2Wild 2026-09-10 (SM12x): DeepGEMM's paged MQA logits (indexer decode)
+        # takes 32 or 64 states per block, and the indexer metadata builder passes
+        # this spec's num_states, so pages hold 64 states = 64 * compress_ratio tokens.
+        block_size = self.cache_config.block_size
+        if _dsv41_indexer_sm12x():
+            block_size = 64 * max(1, self.compress_ratio)
         return MLAAttentionSpec(
-            block_size=self.cache_config.block_size,
+            block_size=block_size,
             num_kv_heads=1,
             head_size=self.head_dim,
             dtype=self.dtype,
@@ -1012,6 +1033,8 @@ class DeepseekV4IndexerCache(torch.nn.Module, AttentionLayerBase):
     def forward(self): ...
 
     def get_attn_backend(self) -> type[AttentionBackend]:
+        if _dsv41_indexer_sm12x():
+            return DeepseekV4IndexerSM12xBackend
         return DeepseekV4IndexerBackend
 
 

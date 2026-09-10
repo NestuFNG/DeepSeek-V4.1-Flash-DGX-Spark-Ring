@@ -23,7 +23,7 @@ if [ "$R" != none ]; then
   sh=$(printf '%s\n' "$L" | grep -oE 'checkpoint shards: +[0-9]+%' | tail -1 | grep -oE '[0-9]+')
   [ -n "$sh" ] && sh="shards~$(( sh / 25 * 25 ))%"
   ms=$(printf '%s\n' "$L" | grep -oE 'Loading weights took [0-9.]+ seconds|Model loading took [0-9.]+ GiB|GPU KV cache size: [0-9,]+ tokens|Application startup complete' | tail -1)
-  er=$(printf '%s\n' "$L" | grep -E ' ERROR |Traceback|No available shared memory|Under memory|EngineCore failed|RuntimeError|ValueError' | tail -1 | cut -c1-220)
+  er=$(printf '%s\n' "$L" | grep -E ' ERROR |Traceback|No available shared memory|Under memory|EngineCore failed|RuntimeError|ValueError' | grep -v ' INFO ' | tail -1 | cut -c1-220)
 fi
 echo "$line | minAvail~${b}GiB | ${sh:-no-shards-yet} | ${ms:-no-milestone} | err: ${er:-none}"
 case "$R" in exited|dead) echo "HEAD-EXITED";; esac
