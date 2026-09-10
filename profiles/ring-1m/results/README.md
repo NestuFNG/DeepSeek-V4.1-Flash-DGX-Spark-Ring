@@ -90,3 +90,16 @@ Both truncated tasks were retried concurrently with a 65,536-token allowance and
 Eight agents then shared one already-cached roughly 512K project, each executing the same three-turn tool workflow. All 24 requests and exact final-answer checks passed: 4,503 output tokens / 53.613 seconds =83.990 token/s whole-batch, with 124.960 token/s during the strict eight-way decode window (8.083 seconds / 1,010 tokens). Prefix hit rate was99.941%, peak KV10.11%, median/max TTFT3.404/11.372seconds, and no preemptions. Unlike the independent-project workload, these agents share a common cached prefix.
 
 The parent correctly aggregated the eight returned summaries using449input and67output tokens in1.805seconds. This is a short aggregation request, not another500Kdecode result. See [separate follow-up measurements](agent8-followup-b12.json). All phases retain ON/max and unchanged B12 serving settings.
+
+## Repeated short-input concurrency matrix: B12 K5
+
+The four unchanged upstream task texts were measured at C1/C2/C4/C6/C8, twice each in fixed randomized order:40batches/168requests. All used ON/max, temperature1/top_p.95, output allowance32,768, 1M service limit and16GiB KV per node. Warmup is excluded. Table values are the median whole-batch output token/s across two measurements.
+
+| Task | C1 | C2 | C4 | C6 | C8 |
+|---|---:|---:|---:|---:|---:|
+| Coding | 58.33 | 77.20 | 102.17 | 113.58 | 133.47 |
+| JSON | 51.14 | 63.88 | 85.01 | 106.95 | 117.61 |
+| Math | 56.80 | 79.55 | 108.04 | 145.16 | 165.17 |
+| Prose | 46.27 | 62.30 | 78.28 | 93.48 | 110.33 |
+
+Actual input51–85tokens and output111–1,386tokens per request. Coding C6 varied105.39–121.77 across the two batches; strict C6 decode windows were120.01/127.99token/s. Two repeats are not a stable statistical distribution. All checks passed and no preemptions occurred, within the limited syntax/schema/answer-presence/completion checks described in [the selected raw matrix data](max-matrix-b12-k5.json). No general code correctness or prose quality claim is made. K3 comparison remains pending.
