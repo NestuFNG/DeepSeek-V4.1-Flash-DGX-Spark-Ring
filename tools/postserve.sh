@@ -9,7 +9,7 @@ echo "--- smoke (Kai) ---"; python3 /home/tonyspark2/dsv41_smoke.py 2>&1 | tail 
 if [ "$L" = "$REF_LABEL" ] || [ ! -f "$REF" ]; then echo "--- capture greedy reference ($REF) ---"; python3 /root/v41probes.py $B/chat/completions $M "$REF" 2>&1 | tail -3; fi
 for R in /var/tmp/ref-v41-*.json; do r=$(basename "$R" .json); r=${r#ref-v41-}; [ -f "$R" ] && [ "$r" != "$L" ] || continue
   echo "--- quality vs $r reference ---"; python3 /root/v41compare.py "$R" $B/chat/completions $M 2>&1 | tail -4 | tee "$O/quality-vs-$r.txt"; done
-echo "--- garble gate ---"; python3 /root/v41gate.py $B $M 2>&1 | tail -3 | tee "$O/gate.txt"
+if [ "${GATE:-1}" = 1 ]; then echo "--- garble gate ---"; python3 /root/v41gate.py $B $M 2>&1 | tail -3 | tee "$O/gate.txt"; fi
 if [ "${VISION:-0}" = 1 ]; then echo "--- vision request (solid red 64x64 PNG) ---"
 python3 - <<'PY'
 import base64, json, struct, zlib, urllib.request
@@ -24,6 +24,6 @@ r = json.load(urllib.request.urlopen(urllib.request.Request("http://127.0.0.1:80
 print("VISION answer:", repr(r["choices"][0]["message"].get("content")), "| prompt_tokens:", r["usage"]["prompt_tokens"])
 PY
 fi
-echo "--- fixed-prompt bench v1: C1-C6 + cold prefill ---"
-python3 /root/v41bench.py --base $B --model $M --label "$L" --out "$O" --notes "${BENCH_NOTES:-}" 2>&1 | tee "$O/bench.txt" | tail -40
+if [ "${BENCH:-1}" = 1 ]; then echo "--- fixed-prompt bench v1: C1-C6 + cold prefill ---"
+python3 /root/v41bench.py --base $B --model $M --label "$L" --out "$O" --notes "${BENCH_NOTES:-}" 2>&1 | tee "$O/bench.txt" | tail -40; fi
 echo "=== $L post-serve done $(date -u +%FT%TZ) ==="
