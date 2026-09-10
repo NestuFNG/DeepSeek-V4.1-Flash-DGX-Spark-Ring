@@ -42,9 +42,8 @@ NCCL_EXTRA="${NCCL_EXTRA:-}"
 NAME="vllm_dsv41"
 MODEL_DIR="DeepSeek-V4.1-Flash"
 CACHE_HOST_PATH="/var/tmp/dsv41-vllm-cache"
-PATCH_DIR="$HOME/patches/dsv41-engram-disk"
 TOK_ARGS=""
-case "$IMAGE" in *deepseekv41-flash-0909*) PATCH_DIR="$HOME/patches/dsv41-engram-disk-0909"; TOK_ARGS="--tokenizer-mode deepseek_v41" ;; esac
+case "$IMAGE" in *deepseekv41-flash-0909*) TOK_ARGS="--tokenizer-mode deepseek_v41" ;; esac
 # (overlay/branch image: tokenizer-mode auto-resolves to deepseek_v41 from model_type; its CLI choices list lacks the literal)
 SITE="/usr/local/lib/python3.12/dist-packages/vllm"
 HEAD_IP="192.168.192.2"; MPORT="29541"; PORT="8000"
@@ -60,12 +59,23 @@ esac
 # ---- preflight ----
 test -f "$MODEL_HOST/config.json" || { echo "MODEL MISSING at $MODEL_HOST" >&2; exit 3; }
 test -f "$MODEL_HOST/model-00048-of-00048.safetensors" || { echo "MODEL INCOMPLETE at $MODEL_HOST (shard 48 missing)" >&2; exit 3; }
+PATCH_DIR="${PATCH_DIR:-$HOME/patches/dsv41-boot3}"
+PATCH_MOUNTS=""
+if [ -f "$PATCH_DIR/mounts.txt" ]; then
+  # manifest: "<file> <site-relative path>" per line; ENGRAM_DISK=0 skips the engram files
+  while read -r f rel; do
+    [ -z "$f" ] && continue
+    if [ "$ENGRAM_DISK" != "1" ] && { [ "$f" = "engram.py" ] || [ "$f" = "weight_utils.py" ]; }; then continue; fi
+    test -f "$PATCH_DIR/$f" || { echo "PATCH FILE MISSING: $PATCH_DIR/$f" >&2; exit 3; }
+    PATCH_MOUNTS="$PATCH_MOUNTS -v $PATCH_DIR/$f:$SITE/$rel:ro"
+  done < "$PATCH_DIR/mounts.txt"
+else
+  echo "no mounts.txt in $PATCH_DIR" >&2; exit 3
+fi
 if [ "$ENGRAM_DISK" = "1" ]; then
-  test -f "$PATCH_DIR/engram.py" && test -f "$PATCH_DIR/weight_utils.py" || { echo "PATCH MISSING in $PATCH_DIR" >&2; exit 3; }
-  PATCH_MOUNTS="-v $PATCH_DIR/engram.py:$SITE/models/deepseek_v4_1/common/engram.py:ro -v $PATCH_DIR/weight_utils.py:$SITE/model_executor/model_loader/weight_utils.py:ro"
   ENGRAM_ENV="-e DSV41_ENGRAM_DISK=1 -e DSV41_ENGRAM_DISK_THREADS=${ENGRAM_THREADS:-32} -e DSV41_ENGRAM_DISK_CHUNK=${ENGRAM_CHUNK:-16}"
 else
-  PATCH_MOUNTS=""; ENGRAM_ENV="-e DSV41_ENGRAM_DISK=0"
+  ENGRAM_ENV="-e DSV41_ENGRAM_DISK=0"
 fi
 mkdir -p "$CACHE_HOST_PATH"
 docker rm -f "$NAME" 2>/dev/null || true
@@ -74,8 +84,9 @@ AVAIL_GB=$(( $(grep MemAvailable /proc/meminfo | awk '{print $2}') / 1048576 ))
 [ "$AVAIL_GB" -ge 100 ] || { echo "MemAvailable ${AVAIL_GB} GiB < 100 GiB, refusing to boot" >&2; exit 4; }
 
 if [ "$EAGER" = "1" ]; then GRAPH_ARGS="--enforce-eager"; else GRAPH_ARGS="--compilation-config {\"cudagraph_mode\":\"$CUDAGRAPH_MODE\"}"; fi
+if [ "$EAGER" = "1" ]; then SPEC_ADAPT=false; else SPEC_ADAPT="${SPEC_ADAPT:-true}"; fi  # adaptive verification needs CUDA graphs
 if [ "$SPEC" = "dspark" ]; then
-  SPEC_ARGS="--speculative-config {\"method\":\"dspark\",\"num_speculative_tokens\":${SPEC_K:-5},\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"block\",\"enable_adaptive_verification\":true}"
+  SPEC_ARGS="--speculative-config {\"method\":\"dspark\",\"num_speculative_tokens\":${SPEC_K:-5},\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"block\",\"enable_adaptive_verification\":${SPEC_ADAPT}}"
 else SPEC_ARGS=""; fi
 if [ "$TEXT_ONLY" = "1" ]; then TEXT_ARGS="--language-model-only"; else TEXT_ARGS=""; fi
 if [ "$PARSERS" = "1" ]; then PARSER_ARGS="--tool-call-parser deepseek_v41 --enable-auto-tool-choice --reasoning-parser deepseek_v41"; else PARSER_ARGS=""; fi
@@ -91,7 +102,7 @@ docker run --gpus all -d --name "$NAME" --restart no \
   -e VLLM_HOST_IP=$HOST_IP -e HF_HOME=/cache/huggingface -e HF_HUB_OFFLINE=1 -e TRANSFORMERS_OFFLINE=1 \
   -e VLLM_CACHE_ROOT="/cache/vllm-$EXP_NAME" \
   -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-  -e VLLM_USE_RUST_FRONTEND=$RUST_FE \
+  -e VLLM_USE_RUST_FRONTEND=$RUST_FE -e VLLM_HAS_FLASHINFER_CUBIN=1 \
   $ENGRAM_ENV \
   -e TORCH_CUDA_ARCH_LIST=12.1a -e FLASHINFER_CUDA_ARCH_LIST=12.1a -e FLASHINFER_DISABLE_VERSION_CHECK=1 \
   -e NCCL_NET=IB -e NCCL_IB_DISABLE=0 -e NCCL_IB_HCA=rocep1s0f0 -e NCCL_IB_GID_INDEX=3 \
@@ -112,6 +123,6 @@ docker run --gpus all -d --name "$NAME" --restart no \
     --distributed-executor-backend mp --nnodes 4 --node-rank "$NODE_RANK" \
     --master-addr "$HEAD_IP" --master-port "$MPORT" $HEADLESS $VLLM_EXTRA
 
-echo "launched $NAME rank=$NODE_RANK exp=$EXP_NAME image=$IMAGE gmu=$GMU maxlen=$MAXLEN seqs=$SEQS eager=$EAGER spec=$SPEC engram_disk=$ENGRAM_DISK text_only=$TEXT_ONLY avail=${AVAIL_GB}GiB"
+echo "launched $NAME rank=$NODE_RANK exp=$EXP_NAME image=$IMAGE patches=$PATCH_DIR gmu=$GMU maxlen=$MAXLEN seqs=$SEQS eager=$EAGER spec=$SPEC engram_disk=$ENGRAM_DISK text_only=$TEXT_ONLY avail=${AVAIL_GB}GiB"
 sleep 3
 docker ps --format '{{.Names}} {{.Status}}' | grep "$NAME" || { echo "$NAME exited" >&2; docker logs --tail 40 "$NAME" >&2; exit 1; }
