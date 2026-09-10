@@ -55,17 +55,17 @@ Build each image on every node; they are node-local.
 
 ## 4. Patches (bind-mounted over the image; nothing baked)
 
-Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-boot3/` on every node. The launcher mounts each file over the site-packages path the manifest gives. `tools/prelaunch-8.sh` does this with md5 checks.
+Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-boot3/` on every node. The launcher mounts each file over the site-packages path the manifest gives. `tools/prelaunch-8.sh` does this with md5 checks. The top-level `patch/` files are byte-identical to what the serving boot mounts; `patch/README.md` lists their md5s, and the subfolders hold each fix's diff and test.
 
 | file (repo) | mounted over (`vllm/...`) | what it does |
 |---|---|---|
-| `patch/cudagraph-prestage/engram.py` | `models/deepseek_v4_1/common/engram.py` | **Engram on disk.** Rows are read with `preadv` from shards 47/48 and dequantized on the CPU. Includes the rank-offset fix (without it, ranks 1-3 read rank 0's rows; [details](boot3-wedge-and-engram-offset.md)). Includes one shared read pool, so every row for both Engram layers is in flight at once. Adds `EngramDiskStager`. |
-| `patch/cudagraph-prestage/model_state.py` | `models/deepseek_v4_1/nvidia/model_state.py` | Stages the Engram rows in `prepare_inputs`, **before the forward**: one GPU hash, one host sync, parallel reads into the persistent `staged_rows` buffer. The forward then has no host round trip, so it can be captured as a CUDA graph. |
+| `patch/engram.py` | `models/deepseek_v4_1/common/engram.py` | **Engram on disk.** Rows are read with `preadv` from shards 47/48 and dequantized on the CPU. Includes the rank-offset fix (without it, ranks 1-3 read rank 0's rows; [details](boot3-wedge-and-engram-offset.md)). Includes one shared read pool, so every row for both Engram layers is in flight at once. Adds `EngramDiskStager`. |
+| `patch/model_state.py` | `models/deepseek_v4_1/nvidia/model_state.py` | Stages the Engram rows in `prepare_inputs`, **before the forward**: one GPU hash, one host sync, parallel reads into the persistent `staged_rows` buffer. The forward then has no host round trip, so it can be captured as a CUDA graph. |
 | `patch/weight_utils.py` | `model_executor/model_loader/weight_utils.py` | The loader skips the two Engram tables (203 GB never read at load). |
-| `patch/sm12x-pages/attention.py` | `models/deepseek_v4_1/attention.py` | SM12x page sizes: the SWA cache and compressed-KV pages come from the backend. The indexer cache holds 64 states per page (64 tokens at ratio 1, 128 at ratio 2), because DeepGEMM's paged MQA logits only takes 32 or 64 ([details](boot5-indexer-pages.md)). |
-| `patch/sm12x-pages/flashinfer_sparse.py` | `models/deepseek_v4_1/nvidia/flashinfer_sparse.py` | Pages hold 64 compressed states. Adds a 64-token SWA backend, the only page size FlashInfer's SM120 sparse-MLA kernels are built for. |
-| `patch/sm12x-pages/sparse_swa.py` | `v1/attention/backends/mla/sparse_swa.py` | The `get_swa_block_size()` hook. |
-| `patch/sm12x-indexer-topk/sparse_attn_indexer.py` | `model_executor/layers/sparse_attn_indexer.py` | SM12x decode top-k uses `top_k_per_row_decode`. `persistent_topk` oversubscribes GB10's 48 SMs on long rows and kills the engine; the generic kernel matches `torch.topk` and is 1.6-3.6x faster on GB10 ([results](../patch/sm12x-indexer-topk/RESULTS.md)). |
+| `patch/attention.py` | `models/deepseek_v4_1/attention.py` | SM12x page sizes: the SWA cache and compressed-KV pages come from the backend. The indexer cache holds 64 states per page (64 tokens at ratio 1, 128 at ratio 2), because DeepGEMM's paged MQA logits only takes 32 or 64 ([details](boot5-indexer-pages.md)). |
+| `patch/flashinfer_sparse.py` | `models/deepseek_v4_1/nvidia/flashinfer_sparse.py` | Pages hold 64 compressed states. Adds a 64-token SWA backend, the only page size FlashInfer's SM120 sparse-MLA kernels are built for. |
+| `patch/sparse_swa.py` | `v1/attention/backends/mla/sparse_swa.py` | The `get_swa_block_size()` hook. |
+| `patch/sparse_attn_indexer.py` | `model_executor/layers/sparse_attn_indexer.py` | SM12x decode top-k uses `top_k_per_row_decode`. `persistent_topk` oversubscribes GB10's 48 SMs on long rows and kills the engine; the generic kernel matches `torch.topk` and is 1.6-3.6x faster on GB10 ([results](../patch/sm12x-indexer-topk/RESULTS.md)). |
 
 ## 5. Launch
 
