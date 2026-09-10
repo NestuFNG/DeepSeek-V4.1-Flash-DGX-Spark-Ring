@@ -2,10 +2,10 @@
 
 **Status (2026-09-10): serving.**
 - The model dropped at about 2 AM ET, and this stack started serving it at 9:17 AM ET the same day.
-- Speed, measured, streaming, warmed, temperature 0:
-  - One stream: **40.5 tok/s** on counting, 39.1 on structured tables, 32.9 on code, 15.2 on prose.
-  - Six streams: **190 tok/s** aggregate.
-- Context: **300K** max context with an **841,005-token** KV pool.
+- Speed (boot 9, all four GPUs healthy), single stream, temperature 0:
+  - count-to-100 **60.8 tok/s**, the bench coding prompt **57.1 tok/s**, count-to-300 **68.2 tok/s**
+  - full C1-C6 bench below
+- Context: **300K** max context with a **1,032,963-token** KV pool (3.44x at 300K). Tools and vision are on.
 - 1M max context was proven on a separate boot, with a 1,078,380-token DSpark KV pool.
 - Nothing on this page is a projection.
 
@@ -68,7 +68,8 @@ All in tok/s.
 |---|---|
 | eager, no speculation (boot 6) | 5.1 |
 | eager + DSpark k=5 (boot 7) | 19.5-22.1 |
-| **DSpark + CUDA graphs + Engram rows staged before the forward (boot 8)** | **41.5** (count-to-100 check; bench ceiling 40.5) |
+| DSpark + CUDA graphs + Engram rows staged before the forward (boot 8) | 41.5 (count-to-100 check; bench ceiling 40.5) |
+| **+ GPU clock latch cleared on two nodes (boot 9, also tools + vision + gmu 0.80)** | **60.8** (count-to-100; 68.2 on count-to-300) |
 
 **DSpark acceptance** (vLLM SpecDecoding metrics across the bench): mean acceptance length 3.47 tokens per step.
 - It ranges from 1.9 on prose and narrative to 5.6 on counting and tables.
@@ -97,6 +98,7 @@ In boot order. Details in `docs/`.
 6. **Relaunch race.** A new worker joined the still-live old head's rendezvous on the same port. Fix: `tools/launch.sh` stops every node first.
 7. **`persistent_topk` on GB10** (boot 7, long context). It oversubscribes the 48 SMs, and its fallback needs 128 KB of shared memory per block (GB10 has 99 KB). Fix: `top_k_per_row_decode`, which is also 1.6-3.6x faster there. [results](patch/sm12x-indexer-topk/RESULTS.md)
 8. **Eager mode was the throughput ceiling.** About 200 ms per step, host-bound; the GPUs sat near idle. Fix: the Engram lookup moves out of the forward into `prepare_inputs` (`patch/model_state.py`), with all rows read in parallel. The whole decode step is then captured as a CUDA graph, with exact capture sizes so DSpark batches are never padded (FlashInfer #5015).
+9. **GPU clock latch** (2 of 4 Sparks). Reddie and Asusi sat at 630-950 MHz with no visible cause. Every TP step waited for them. Fix: unplug the adapter for 30-60 s; a reboot does not clear it. Result: count 41.5 to 60.8 tok/s, code 32.9 to 57.1. [docs](docs/gpu-clock-latch.md)
 
 ## Boot log
 
@@ -109,14 +111,20 @@ In boot order. Details in `docs/`.
 | 5 | + `--block-size 128`, Engram offset fix, 300K | KV 2,346,690. Died in decode warmup: DeepGEMM `block_kv == 32 or block_kv == 64`. |
 | 6 | + indexer pages of 64 states | **Served.** Eager, no speculation: 5.1 tok/s (count). Smoke clean, greedy reference 8/8, garble gate 30/30. |
 | 7 | + DSpark k=5 at 1M max context | **Served at 1M.** KV 1,078,380. DSpark eager 19.5-22.1 tok/s. A 32K request then killed it in `persistent_topk` (fix 7). |
-| 8 | + CUDA graphs, Engram staged before the forward, top-k fix, gmu 0.78, 300K | **Serving.** 41.5 tok/s count check. Results above. |
+| 8 | + CUDA graphs, Engram staged before the forward, top-k fix, gmu 0.78, 300K | Served. Count check 41.5 tok/s, code 32.9 (two GPUs clock-latched, found later). |
+| 9 | + tools, vision, gmu 0.80; Reddie and Asusi power-cycled to clear a GPU clock latch | **Serving.** KV 1,032,963 (3.44x at 300K). Count-to-100 60.8 tok/s, code 57.1, count-to-300 68.2. Tool call and image OK. |
 
 ## Known limits and next steps
 
-- **Text only.** The vision encoder is not loaded (`--language-model-only`).
-- **Thinking and tools.** Thinking is off by default; a request can turn it on with `"chat_template_kwargs": {"thinking": true}`. Tool-call and reasoning parsers are not enabled.
+- **Vision and tools.**
+  - Both on: up to 4 images per request, with the `deepseek_v41` tool and reasoning parsers.
+  - Thinking is off by default; a request can turn it on with `"chat_template_kwargs": {"thinking": true}`.
+  - FlashInfer #4973 (vision on SM120) did not reproduce on a single test image; heavier image traffic is untested.
 - **Adaptive verification is off.** It pads speculative batches, and padded batches can hang SM120 sparse MLA (FlashInfer #5015, open).
-- **Step time.** A DSpark step still takes about 145 ms: 40.5 tok/s at about 5.9 accepted tokens per step on counting. The next speed work is to profile that step under graphs: the Engram reads, the 2 all-reduces per layer over RoCE, and the draft forward.
+- **Step time.** With all four GPUs healthy, a DSpark step takes about 97 ms on counting (60.8 tok/s at about 5.9 accepted tokens per step), down from about 145 ms. The next levers:
+  - the Engram staging, which idles the GPU every step
+  - the ~90 all-reduces per step over RoCE
+  - the MoE kernel
 - **Engram reads scale with tokens per step.** At high concurrency they become the bottleneck. Local copies of each rank's Engram quarter would take NFS out of the path.
 - **1M long context after the top-k fix.** The top-k fix is validated on GB10 at row widths up to 300,000. A 1M-token request has not been re-run on the fixed stack.
 - **Host hardening** (system settings, not applied here): see [docs/RECIPE.md](docs/RECIPE.md) step 7.
@@ -127,7 +135,7 @@ In boot order. Details in `docs/`.
 |---|---|
 | `patch/` | The exact files bind-mounted over vLLM (md5s in `patch/README.md`), plus one folder per fix with its diff and test. |
 | `build/` | Image chain: overlay1 (branch + sm121 extension), overlay3 (FlashInfer 0.7.0rc1), overlay4/5 (prebuilt kernels). |
-| `launch/` | `dsv41-tp4.sh <rank>`, `boot_dsv41.sh` (worker-first fan-out), `bootN-go.sh` per boot (`boot8-go.sh` is the serving config). |
+| `launch/` | `dsv41-tp4.sh <rank>`, `boot_dsv41.sh` (worker-first fan-out), `bootN-go.sh` per boot (`boot9-go.sh` is the serving config). |
 | `tools/` | Launch wrapper, pre-launch patch installer, boot poll, post-serve checks, hang watchdog, bench comparison, reproduction scripts. |
 | `bench/` | Fixed prompt set v1, C1-C6 bench, long-context needle test. |
 | `docs/` | Recipe and one post-mortem per failure. |

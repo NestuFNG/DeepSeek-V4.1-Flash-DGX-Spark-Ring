@@ -72,7 +72,7 @@ Copy these seven files and the manifest `patch/mounts.txt` to `~/patches/dsv41-b
 - `launch/dsv41-tp4.sh <rank>` starts one rank.
 - `launch/boot_dsv41.sh` (run on any node with SSH to the others) starts ranks 3, 2 and 1, then the head, with identical knobs.
 - `tools/launch.sh <N>` wraps it. It **stops `vllm_dsv41` on every node first, head first**, runs `/root/prelaunch-<N>.sh` if present, then runs `launch/boot<N>-go.sh`. Stopping everything first matters: a new worker that starts while an old head is still listening on the same port joins that head's rendezvous and hangs the new boot.
-- The serving configuration is `launch/boot8-go.sh`.
+- The serving configuration is `launch/boot9-go.sh`.
 
 Flags and environment that matter, and why:
 
@@ -81,11 +81,12 @@ Flags and environment that matter, and why:
 | `--compilation-config {"cudagraph_mode":"FULL_AND_PIECEWISE","cudagraph_capture_sizes":[5,6,10,12,15,18,20,24,25,30,35,36,40,42,48]}` | CUDA graphs are the throughput fix: eager decode on this model is host-bound (about 200 ms per step, GPUs nearly idle). FULL graphs cover uniform decode batches; mixed batches use breakable PIECEWISE graphs. With DSpark k=5, every decode batch is a multiple of 6 target tokens, or 5 draft tokens, so each has an exact graph and nothing is padded. Padded speculative batches can hang SM120 sparse MLA (FlashInfer #5015). |
 | `-e VLLM_USE_BREAKABLE_CUDAGRAPH=1` | Set explicitly on every node, because the eager-break decorator binds when the model imports. |
 | `--speculative-config {"method":"dspark","num_speculative_tokens":5,"draft_sample_method":"probabilistic","rejection_sample_method":"block","enable_adaptive_verification":false}` | DSpark with the checkpoint's own draft layers. Adaptive verification stays off: it forces variable-length decode graphs with padded rows, the #5015 trigger. |
-| `--gpu-memory-utilization 0.78` | Leaves host headroom for the graph pool (measured 1.58 GiB) on unified memory. Nodes serve with 11-12 GiB available. |
-| `--max-model-len 300000`, `--max-num-seqs 8`, `--max-num-batched-tokens 8192` | 300K context; KV pool 841,005 tokens (2.80x at 300K). |
+| `--gpu-memory-utilization 0.80` | Measured: target graphs take 1.85 GiB and draft graphs 0.56 GiB; the KV pool is 4.84 GiB. |
+| `--max-model-len 300000`, `--max-num-seqs 8`, `--max-num-batched-tokens 8192` | 300K context; KV pool **1,032,963 tokens** (3.44x at 300K), with vision and tools on. |
 | `--block-size 128` | Required. vLLM would otherwise pick 64 (the smallest size the patched main backend lists), and the V4 indexer backend refuses it at KV init ([details](boot4-block-size.md)). The per-layer 64-state pages from the patches still apply. |
 | `--engram-config '{"cpu_offload": false}'` + `DSV41_ENGRAM_DISK=1` | Engram from disk (32 read threads). |
-| `--language-model-only` | Text only; the vision encoder is not loaded. |
+| `--limit-mm-per-prompt {"image":4} --mm-processor-cache-gb 1` | Vision on: up to 4 images per request. The encoder adds about 0.22 GiB per rank (81.58 GiB with DSpark). |
+| `--tool-call-parser deepseek_v41 --enable-auto-tool-choice --reasoning-parser deepseek_v41` | Tool calling on; the parsers and the Rust tool-parser extension ship in the image. |
 | `--default-chat-template-kwargs '{"thinking": false}'` | Thinking off by default. A request can turn it on with `chat_template_kwargs`. |
 | `-e MAX_JOBS=2 -e FLASHINFER_NVCC_THREADS=1` | If anything still compiles at runtime, it cannot take the host down. |
 | `-e VLLM_USE_FLASHINFER_SAMPLER=0` | Native sampler, so the first request does not JIT-compile one. |
