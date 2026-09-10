@@ -30,9 +30,8 @@ This repo is the recipe that makes it fit:
 | 4 | overlay5 (kernels prebuilt) + `MAX_JOBS=2` | No runtime JIT; KV 2,026,695 tokens. Died at KV init: `No common block size for 64`. vLLM picks min(`[128, 64]`) = 64, and the V4 indexer backend takes only 128 on SM12x. [docs](docs/boot4-block-size.md) |
 | 5 | + `--block-size 128`, Engram rank-offset fix, 300K ctx | KV 2,346,690 tokens; every rank now reads its own Engram rows. Died in decode warmup: DeepGEMM paged MQA logits takes 32 or 64 states per block, and the ratio-1 indexer cache had 128. [docs](docs/boot5-indexer-pages.md) |
 | 6 | + SM12x indexer pages of 64 states | **Serving** (text-only, no speculation). KV 2,318,801 tokens (10.61 GiB, 7.73x at 300K). |
-| 7 (next) | + DSpark k=5 | |
-| 8 (planned) | DSpark at 1M max context (proof boot) | |
-| 9 (planned) | DSpark, 300K, left running | |
+| 7 (next) | + DSpark k=5 at 1M max context (proof boot) | |
+| 8 (planned) | DSpark at 300K, left running | |
 
 Fleet: Reddie (head; model on local NVMe, exported over NFS), Asusi, Bluey and Spark4 (workers; read the weights over NFS). ConnectX-7 RoCE fabric 192.168.192.0/24.
 
