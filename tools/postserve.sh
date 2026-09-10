@@ -1,7 +1,7 @@
 #!/bin/bash
 # Post-serve checks for V4.1 boots (root on Reddie).  usage: postserve.sh <label>
 L=${1:?label}; B=http://127.0.0.1:8000/v1; M=deepseek-v4.1-flash; O=/var/tmp/boot-results/$L; mkdir -p "$O"
-REF_LABEL=${REF_LABEL:-boot5}; REF=/var/tmp/ref-v41-$REF_LABEL.json
+REF_LABEL=${REF_LABEL:-boot6}; REF=/var/tmp/ref-v41-$REF_LABEL.json
 echo "=== $L post-serve $(date -u +%FT%TZ) ==="
 curl -s -m 20 $B/models | python3 -c "import json,sys;d=json.load(sys.stdin)['data'][0];print('serving',d['id'],'max_model_len',d.get('max_model_len'))"
 for i in 1 2 3; do curl -s -m 600 $B/chat/completions -H "Content-Type: application/json" -d "{\"model\":\"$M\",\"messages\":[{\"role\":\"user\",\"content\":\"warm $i: say ok\"}],\"max_tokens\":8}" >/dev/null; done
