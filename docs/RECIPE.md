@@ -110,6 +110,8 @@ Flags and environment that matter, and why:
 
 ## 7. Host hardening we recommend
 
+- **Check the GPU clocks first.** A GB10 can latch below 1 GHz with no visible cause, and only unplugging the adapter for 30-60 s clears it. Two of our four were stuck. Under a 15 s fp16 burn (`tools/recover.sh`), every node should show about 2.2-2.4 GHz, 80 W+ and 75-90 TFLOPS. [details](gpu-clock-latch.md)
+
 These are system settings, so apply them yourself:
 - Enable `dgx-anti-oom` and make its container regex match `vllm_dsv41`.
 - Set `vm.min_free_kbytes=1048576` and `vm.watermark_scale_factor=200`.
