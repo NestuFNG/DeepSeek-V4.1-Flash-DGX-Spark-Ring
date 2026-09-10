@@ -3,8 +3,8 @@
 **Status (2026-09-10): serving.**
 - The model dropped at about 2 AM ET, and this stack started serving it at 9:17 AM ET the same day.
 - Speed (boot 9, all four GPUs healthy), single stream, temperature 0:
-  - count-to-100 **60.8 tok/s**, the bench coding prompt **57.1 tok/s**, count-to-300 **68.2 tok/s**
-  - full C1-C6 bench below
+  - One stream (streaming bench): counting **77.2 tok/s**, tables 71.4, **code 52.4**, math 46.9, reasoning 39.0, prose 23.3.
+  - Six streams: **214 tok/s** aggregate on counting, 143 on code.
 - Context: **300K** max context with a **1,032,963-token** KV pool (3.44x at 300K). Tools and vision are on.
 - 1M max context was proven on a separate boot, with a 1,078,380-token DSpark KV pool.
 - Nothing on this page is a projection.
@@ -19,48 +19,51 @@ It does not fit four GB10s as shipped. The 296 GB of experts split four ways is 
 
 ## Results
 
-Boot 8, the serving config: 4x DGX Spark TP4, DSpark k=5, FULL_AND_PIECEWISE CUDA graphs, 300K context, gmu 0.78.
+Boot 9, the serving config: 4x DGX Spark TP4, DSpark k=5, FULL_AND_PIECEWISE CUDA graphs, tools and vision on, 300K context, gmu 0.80, all four GPUs healthy.
 
 About the benchmark:
 - Fixed prompt set `bench/prompts-v1.json`, identical on every boot: 8 categories plus a counting ceiling.
 - Streaming, temperature 0, thinking off, after a warmup.
 - Token counts come from the server's `usage` block, never from stream chunks (DSpark packs several tokens per chunk). TTFT is the first token delta.
-- Raw output: `results/boot8/`.
+- Raw output: `results/boot9/`.
 
 **Throughput by concurrency** (mean of the 8 categories; the counting ceiling is excluded):
 
 | C | aggregate tok/s | per-stream tok/s | mean TTFT (s) |
 |---|---|---|---|
-| C1 | 20.26 | 24.22 | 1.004 |
-| C2 | 34.03 | 21.07 | 1.78 |
-| C3 | 53.19 | 21.75 | 0.933 |
-| C4 | 64.13 | 18.93 | 0.926 |
-| C5 | 64.61 | 15.53 | 1.204 |
-| C6 | 82.01 | 16.78 | 1.18 |
+| C1 | 33.88 | 39.2 | 0.533 |
+| C2 | 58.99 | 34.17 | 0.704 |
+| C3 | 67.56 | 26.07 | 0.61 |
+| C4 | 85.5 | 24.75 | 0.592 |
+| C5 | 91.96 | 21.25 | 0.692 |
+| C6 | 97.99 | 18.87 | 0.736 |
 
 **Per-stream tok/s by category:**
 
 | category | C1 | C2 | C3 | C4 | C5 | C6 |
 |---|---|---|---|---|---|---|
-| coding | 32.92 | 27.44 | 35.27 | 31.0 | 19.86 | 27.03 |
-| json | 23.72 | 21.08 | 21.25 | 18.94 | 11.78 | 15.71 |
-| narrative | 12.4 | 10.37 | 8.3 | 7.2 | 7.68 | 7.58 |
-| prose | 15.23 | 14.08 | 12.05 | 9.92 | 9.23 | 8.6 |
-| math | 30.6 | 27.52 | 28.29 | 23.44 | 24.87 | 20.2 |
-| reasoning | 22.81 | 16.19 | 17.51 | 14.27 | 15.78 | 17.33 |
-| summary | 17.0 | 14.09 | 14.17 | 12.14 | 10.62 | 9.31 |
-| format | 39.09 | 37.75 | 37.19 | 34.55 | 24.41 | 28.48 |
-| ceiling_count | 40.46 | 41.3 | 44.52 | 33.1 | 27.64 | 34.56 |
+| coding | 52.37 | 60.44 | 33.39 | 31.25 | 28.53 | 26.25 |
+| json | 38.59 | 37.06 | 19.99 | 20.81 | 18.76 | 16.19 |
+| narrative | 17.41 | 18.72 | 11.22 | 11.56 | 10.16 | 9.85 |
+| prose | 23.26 | 16.13 | 16.08 | 17.57 | 11.96 | 14.02 |
+| math | 46.89 | 46.24 | 46.24 | 49.08 | 27.55 | 25.78 |
+| reasoning | 38.98 | 27.17 | 29.08 | 20.87 | 25.39 | 17.13 |
+| summary | 24.73 | 17.41 | 13.61 | 11.49 | 11.38 | 10.87 |
+| format | 71.41 | 50.21 | 38.94 | 35.36 | 36.29 | 30.85 |
+| ceiling_count | 77.17 | 55.96 | 39.3 | 40.21 | 36.53 | 38.1 |
 
-**Aggregate at C6, by category:**
+**Peak aggregate by category** (tok/s, level):
 
-| counting | code | tables | math | reasoning | JSON | prose |
+| counting | math | tables | code | reasoning | JSON | prose |
 |---|---|---|---|---|---|---|
-| **190.2** | 138.0 | 125.8 | 107.7 | 87.7 | 69.4 | 44.4 |
+| **213.8** (C6) | 171.3 (C4) | 148.9 (C6) | 142.6 (C6) | 111.5 (C5) | 83.3 (C6) | 71.8 (C6) |
 
-All in tok/s.
+**TTFT at C1:** 0.27 s (counting) to 0.58 s (math); 1.2 s for the summary prompt, which carries a ~300-token passage.
 
-**TTFT at C1:** 0.44 s (counting) to 1.2 s for short prompts; 2.0 s for the summary prompt, which carries a ~300-token passage.
+**Before the GPU clock fix** (boot 8, same prompts, `results/boot8/`):
+- C1 mean per-stream: 24.2 to 39.2 tok/s (1.62x).
+- Code: 32.9 to 52.4. Counting: 40.5 to 77.2.
+- C6 aggregate peak: 190.2 to 213.8.
 
 **What each fix bought (counting prompt, one stream, measured):**
 
@@ -69,20 +72,18 @@ All in tok/s.
 | eager, no speculation (boot 6) | 5.1 |
 | eager + DSpark k=5 (boot 7) | 19.5-22.1 |
 | DSpark + CUDA graphs + Engram rows staged before the forward (boot 8) | 41.5 (count-to-100 check; bench ceiling 40.5) |
-| **+ GPU clock latch cleared on two nodes (boot 9, also tools + vision + gmu 0.80)** | **60.8** (count-to-100; 68.2 on count-to-300) |
+| **+ GPU clock latch cleared on two nodes (boot 9)** | **60.8** count-to-100 check; **77.2** bench counting ceiling |
 
-**DSpark acceptance** (vLLM SpecDecoding metrics across the bench): mean acceptance length 3.47 tokens per step.
-- It ranges from 1.9 on prose and narrative to 5.6 on counting and tables.
-- That spread is why per-stream speed runs from 12 to 40 tok/s by content.
+**DSpark acceptance** (vLLM SpecDecoding metrics across the boot 9 bench, 42 ten-second windows): mean acceptance length 3.56 tokens per step, range 1.95-5.79. Counting and tables sit near the maximum of 6; prose and narrative stay near 2, which is why per-stream speed spans 17-77 tok/s by content.
 
-**Memory:**
+**Memory (boot 9):**
 
 | | value |
 |---|---|
-| Weights per rank, with the DSpark draft layers | 81.36 GiB |
-| CUDA graphs | 1.58 GiB (captured in 45 s) |
-| KV | 3.94 GiB = 841,005 tokens (2.80x at 300K) |
-| Host memory available per node while serving | 11-12 GiB |
+| Weights per rank, with the DSpark draft layers and the vision encoder | 81.58 GiB |
+| CUDA graphs | 1.85 GiB target + 0.56 GiB draft |
+| KV | 4.84 GiB = 1,032,963 tokens (3.44x at 300K) |
+| Host memory available per node while serving | 9-10 GiB |
 
 **1M max context (boot 7):** served at `--max-model-len 1048576` with DSpark: KV 1,078,380 tokens (5.21 GiB, 1.03x at 1M), eager, gmu 0.80.
 
