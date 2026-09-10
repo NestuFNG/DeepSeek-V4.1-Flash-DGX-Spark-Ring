@@ -1,0 +1,339 @@
+{
+  "measurement_date": "2026-09-11 Asia/Shanghai",
+  "configuration": {
+    "boot": 14,
+    "k": 5,
+    "prefill_chunk_tokens": 4096,
+    "max_model_len": 1048576,
+    "max_num_seqs": 8,
+    "kv_GiB_per_rank": 16,
+    "kv_dtype": "fp8",
+    "thinking": "ON/max",
+    "temperature": 1,
+    "top_p": 0.95,
+    "output_allowance": 65536,
+    "target_hot_context": 32768,
+    "target_cold_context": 131072,
+    "shared_hot_prefix": true,
+    "repeats": 2,
+    "task": "The log above is project context. This is the current task; do not repeat the lookup answer.\nWrite one complete Python code block implementing these pure functions:\nmerge_intervals(intervals), chunk_sequence(sequence, size), and flatten_nested(items).\nMerge overlapping numeric closed intervals in sorted order and never mutate inputs.\nchunk_sequence returns lists of at most size elements and rejects nonpositive sizes.\nflatten_nested flattens only nested list/tuple values, preserving scalars, without recursion.\nInclude unittest classes with at least twelve concrete test methods total, covering\nempty inputs, boundaries, invalid chunk sizes, repeated intervals, and nested values.\nUse only the Python standard library. Include short docstrings. End after the code block.\n",
+    "scope": "Scheduling and kernel pilot only; not eight independent500K contexts."
+  },
+  "complete": true,
+  "all_structural_checks_passed": true,
+  "cells": [
+    {
+      "phase": "hot-only-r0",
+      "mixed": false,
+      "repeat": 0,
+      "elapsed_seconds": 491.5688537410024,
+      "six_hot_tokens": 54837,
+      "whole_phase_tps": 111.55507429462261,
+      "hot_window": {
+        "seconds": 326.69703435897827,
+        "output_tokens": 38252.0,
+        "aggregate_hot_tps": 117.08707449718777,
+        "sampled_intervals": 161,
+        "qualified_window": true,
+        "scope": "Same six hot requests already generating at both sample endpoints. Mixed window requires cold request submitted but no first token yet, so output counter contains only the hot streams. Two-second sampling; not GPU kernel timing."
+      },
+      "checks": [
+        {
+          "passed": true,
+          "defined_test_methods": 24,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 18,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 22,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 22,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 20,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 22,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        }
+      ],
+      "input_tokens": [
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        32702
+      ],
+      "output_tokens": [
+        7797,
+        10345,
+        8126,
+        9705,
+        6706,
+        12158
+      ],
+      "hot_ttft_seconds": [
+        2.10402819000592,
+        2.1032978000002913,
+        2.102881107988651,
+        0.8907810279924888,
+        2.097773977002362,
+        2.104071918001864
+      ],
+      "cold_ttft_seconds": null,
+      "prefix_hit_fraction": 0.9928852465700365,
+      "preemptions": 0.0,
+      "peak_kv_fraction": 0.016190031704137686,
+      "max_output_allowance": 65536
+    },
+    {
+      "phase": "mixed-r0",
+      "mixed": true,
+      "repeat": 0,
+      "elapsed_seconds": 592.1789682389935,
+      "six_hot_tokens": 55524,
+      "whole_phase_tps": 94.10499695002595,
+      "hot_window": {
+        "seconds": 119.78546333312988,
+        "output_tokens": 680.0,
+        "aggregate_hot_tps": 5.676815709339313,
+        "sampled_intervals": 59,
+        "qualified_window": true,
+        "scope": "Same six hot requests already generating at both sample endpoints. Mixed window requires cold request submitted but no first token yet, so output counter contains only the hot streams. Two-second sampling; not GPU kernel timing."
+      },
+      "checks": [
+        {
+          "passed": true,
+          "defined_test_methods": 25,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 25,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 20,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 24,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 24,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 24,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        }
+      ],
+      "input_tokens": [
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        130459
+      ],
+      "output_tokens": [
+        7827,
+        6855,
+        9161,
+        11780,
+        8361,
+        11540,
+        203
+      ],
+      "hot_ttft_seconds": [
+        1.69147471699398,
+        1.6905567740031984,
+        1.6903176360065117,
+        1.6890360430115834,
+        0.6151768099953188,
+        1.6896496480039787
+      ],
+      "cold_ttft_seconds": 121.47245143199689,
+      "prefix_hit_fraction": 0.5971512622791738,
+      "preemptions": 0.0,
+      "peak_kv_fraction": 0.04877931023383808,
+      "max_output_allowance": 65536
+    },
+    {
+      "phase": "mixed-r1",
+      "mixed": true,
+      "repeat": 1,
+      "elapsed_seconds": 577.7335924630024,
+      "six_hot_tokens": 51757,
+      "whole_phase_tps": 89.85283299642012,
+      "hot_window": {
+        "seconds": 119.53547263145447,
+        "output_tokens": 659.0,
+        "aggregate_hot_tps": 5.513007858611095,
+        "sampled_intervals": 59,
+        "qualified_window": true,
+        "scope": "Same six hot requests already generating at both sample endpoints. Mixed window requires cold request submitted but no first token yet, so output counter contains only the hot streams. Two-second sampling; not GPU kernel timing."
+      },
+      "checks": [
+        {
+          "passed": true,
+          "defined_test_methods": 19,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 18,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 23,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 18,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 26,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 22,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        }
+      ],
+      "input_tokens": [
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        130431
+      ],
+      "output_tokens": [
+        8696,
+        6421,
+        12234,
+        7844,
+        8449,
+        8113,
+        154
+      ],
+      "hot_ttft_seconds": [
+        1.8421908940072171,
+        1.8435477510065539,
+        1.8419433109957026,
+        1.842679531997419,
+        1.842406973009929,
+        0.6631666410103207
+      ],
+      "cold_ttft_seconds": 121.76036585999827,
+      "prefix_hit_fraction": 0.5972024503816092,
+      "preemptions": 0.0,
+      "peak_kv_fraction": 0.04877931023383808,
+      "max_output_allowance": 65536
+    },
+    {
+      "phase": "hot-only-r1",
+      "mixed": false,
+      "repeat": 1,
+      "elapsed_seconds": 476.76012595200154,
+      "six_hot_tokens": 54699,
+      "whole_phase_tps": 114.73065179428805,
+      "hot_window": {
+        "seconds": 322.88479018211365,
+        "output_tokens": 38807.0,
+        "aggregate_hot_tps": 120.18838043783994,
+        "sampled_intervals": 159,
+        "qualified_window": true,
+        "scope": "Same six hot requests already generating at both sample endpoints. Mixed window requires cold request submitted but no first token yet, so output counter contains only the hot streams. Two-second sampling; not GPU kernel timing."
+      },
+      "checks": [
+        {
+          "passed": true,
+          "defined_test_methods": 19,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 25,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 20,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 16,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 26,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        },
+        {
+          "passed": true,
+          "defined_test_methods": 21,
+          "scope": "AST syntax, requested functions and test method definitions. Generated code/tests not executed."
+        }
+      ],
+      "input_tokens": [
+        32702,
+        32702,
+        32702,
+        32702,
+        32702,
+        32702
+      ],
+      "output_tokens": [
+        7374,
+        7103,
+        10258,
+        10789,
+        11220,
+        7955
+      ],
+      "hot_ttft_seconds": [
+        1.6908362660033163,
+        1.6901008739951067,
+        1.6883545519958716,
+        1.6892632090020925,
+        1.6915686190041015,
+        0.6343055600009393
+      ],
+      "cold_ttft_seconds": null,
+      "prefix_hit_fraction": 0.9941899578007461,
+      "preemptions": 0.0,
+      "peak_kv_fraction": 0.01632682620660797,
+      "max_output_allowance": 65536
+    }
+  ],
+  "interpretation": "Six shared-prefix33K requests; not eight independent500K. Whole-phase output rate includes all output and tail. Mixed hot window requires the same six requests generating while the cold request has no first token; cold output is excluded. Code validation is syntax/functions/test definitions only; generated code/tests were not executed. Two rounds, reversed phase order in round2."
+}

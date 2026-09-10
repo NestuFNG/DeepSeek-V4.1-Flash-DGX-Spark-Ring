@@ -1,0 +1,88 @@
+{
+  "measurement_date": "2026-09-11 Asia/Shanghai",
+  "boot": 14,
+  "scope": "Synthetic visual and tool protocol checks. Every request explicitly ON/max. No external weather/time service called.",
+  "complete": true,
+  "passed": true,
+  "tests": [
+    {
+      "name": "images-2",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.6490704030002235,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 425,
+      "output_tokens": 67,
+      "reasoning_tokens": 59
+    },
+    {
+      "name": "images-4",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.9534014320088318,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 797,
+      "output_tokens": 93,
+      "reasoning_tokens": 79
+    },
+    {
+      "name": "image-grid",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.8335342860082164,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 243,
+      "output_tokens": 79,
+      "reasoning_tokens": 71
+    },
+    {
+      "name": "parallel-tools",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 1.4675674589962,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 324,
+      "output_tokens": 92,
+      "reasoning_tokens": 23
+    },
+    {
+      "name": "parallel-tools-roundtrip",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.4939585760002956,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 487,
+      "output_tokens": 54,
+      "reasoning_tokens": 32
+    },
+    {
+      "name": "forced-named-tool",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.2090673820057418,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 359,
+      "output_tokens": 53,
+      "reasoning_tokens": 14
+    }
+  ],
+  "validator_correction": "The first run wrongly required finish_reason=tool_calls for a named tool choice. The actual call name and arguments were correct. Live pinned vLLM source explicitly uses stop for named choices. The validator was corrected and all six tests rerun, with strict names, exact arguments and nonempty reasoning checked. No server/model code changed for this correction."
+}
