@@ -62,3 +62,23 @@ An additional single C1 batch and single C6 batch use the upstream `merge_interv
 ## Additional short-concurrency and prefix-cache measurements
 
 The homepage now includes the separate eight-slot candidate measurements, with actual input/output lengths, per-stream decode, batch throughput, strict simultaneous-decode windows and the 33K prefix replay. These do not establish eight resident 500K contexts. See [short C1/C6/C8 raw evidence](short-concurrency-c1-c6-c8.json), [33K prefix replay](prefix-cache-33k.json), and [the homepage tables](../../../README.md). All use ON/max, temperature1/top_p .95; no OFF test was added.
+
+## Eight independent 500K contexts: B12 candidate
+
+The separate B12 long-context run now demonstrates eight simultaneous decoding requests, each with at least 500,000 input tokens. It retains the 1M limit, 16 GiB KV per node, FP8 cache, DSpark K5, prefill chunk 4096 and ON/max settings. B12 includes an experimental CPU prefix-cache boundary correction. The published launcher still uses the B10 six-slot baseline; the B12 launch profile and patch have not been released in this snapshot.
+
+| Workload | Input tokens (sum of requests) | Output tokens | Wall seconds | Whole-batch output token/s | All-eight decode token/s | Acceptance |
+|---|---:|---:|---:|---:|---:|---|
+| Cold independent retrieval, 8 requests | 4,093,814 | 2,080 | 4290.74 | 0.48 | — | All 8 exact-marker checks passed |
+| Hot independent tool agents, 24 requests | 12,298,603 | 4,646 | 61.79 | 75.19 | 122.37 | All 8 three-turn tool workflows passed |
+| Hot long code, 8 requests | 4,097,120 | 185,580 | 2011.23 | 92.27 | 100.04 | 6 complete; 2 truncated at the 32,768-token allowance |
+
+All-eight windows total 10.223 seconds / 1,251 tokens for tools and 1233.740 seconds / 123,425 tokens for code. Adjacent samples must contain the same eight client requests, each already generating, and eight running server requests. Decode figures include reasoning tokens. One batch per workload is reported; no stable tuning gain is inferred from these measurements alone.
+
+Cold input took 4286.542 seconds from request arrival until every first token. Dividing total input by that wall time gives 955.039 input token/s, including scheduling and interleaved decode, not a pure GPU prefill measurement. Cold prefill peaked at only two running requests. Seven responses decoded at about 1.28–1.55 token/s while later cold requests were still prefilling. The later hot stages, with 99.926% / 99.945% prefix hits, must not be substituted for this cold-input latency.
+
+The code acceptance check only parses Python, checks five required functions, at least twenty test-method definitions and an exact synthetic project marker. **Generated code and generated tests were not executed.** Six complete cases have 40–49 test-method definitions. Two hit the output allowance; retries at 65,536 tokens are separate and excluded here. This is not an all-eight successful code-generation run. Whole-code timing was reconstructed from the earliest client start through the latest finish; its counter deltas use the first and last monitoring samples rather than exact phase boundaries.
+
+No preemptions were observed. Peak KV usage was 77.67% for hot tools and 79.94% for long code. The minimum available system memory across the monitored B12 run was 2.28 / 4.42 / 5.12 / 6.06 GiB, sorted without node identities. Shared-parent agents and a fresh eight-way long-code run at the larger allowance remain pending.
+
+Evidence: [selected per-request measurements](long-agent-8x500k-b12.json), [identity-free monitoring samples](long-agent-8x500k-b12-samples.json), [local analysis script](analyze-long-agent.py). The public JSON uses a positive field allowlist; private prompts, responses, reasoning, machine logs, addresses and paths are excluded. The analysis script recomputes whole-batch rates and strict eight-way decode windows from the published data.
