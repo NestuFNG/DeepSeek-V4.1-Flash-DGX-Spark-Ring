@@ -79,6 +79,14 @@ Cold input took 4286.542 seconds from request arrival until every first token. D
 
 The code acceptance check only parses Python, checks five required functions, at least twenty test-method definitions and an exact synthetic project marker. **Generated code and generated tests were not executed.** Six complete cases have 40–49 test-method definitions. Two hit the output allowance; retries at 65,536 tokens are separate and excluded here. This is not an all-eight successful code-generation run. Whole-code timing was reconstructed from the earliest client start through the latest finish; its counter deltas use the first and last monitoring samples rather than exact phase boundaries.
 
-No preemptions were observed. Peak KV usage was 77.67% for hot tools and 79.94% for long code. The minimum available system memory across the monitored B12 run was 2.28 / 4.42 / 5.12 / 6.06 GiB, sorted without node identities. Shared-parent agents and a fresh eight-way long-code run at the larger allowance remain pending.
+No preemptions were observed. Peak KV usage was 77.67% for hot tools and 79.94% for long code. The minimum available system memory across the monitored B12 run was 2.28 / 4.42 / 5.12 / 6.06 GiB, sorted without node identities. A fresh eight-way long-code run at the larger allowance remains pending.
 
 Evidence: [selected per-request measurements](long-agent-8x500k-b12.json), [identity-free monitoring samples](long-agent-8x500k-b12-samples.json), [local analysis script](analyze-long-agent.py). The public JSON uses a positive field allowlist; private prompts, responses, reasoning, machine logs, addresses and paths are excluded. The analysis script recomputes whole-batch rates and strict eight-way decode windows from the published data.
+
+## Separate retries and shared-parent agents
+
+Both truncated tasks were retried concurrently with a 65,536-token allowance and completed at 22,311 / 24,555 tokens. This separate two-way batch generated 46,866 tokens in 728.196 seconds (64.359 token/s). Both passed the same limited code-structure checks. Both natural output lengths were below the original 32K allowance; stochastic output variation means a causal benefit from increasing the allowance is not established. The original eight-way 6/8 result remains unchanged.
+
+Eight agents then shared one already-cached roughly 512K project, each executing the same three-turn tool workflow. All 24 requests and exact final-answer checks passed: 4,503 output tokens / 53.613 seconds =83.990 token/s whole-batch, with 124.960 token/s during the strict eight-way decode window (8.083 seconds / 1,010 tokens). Prefix hit rate was99.941%, peak KV10.11%, median/max TTFT3.404/11.372seconds, and no preemptions. Unlike the independent-project workload, these agents share a common cached prefix.
+
+The parent correctly aggregated the eight returned summaries using449input and67output tokens in1.805seconds. This is a short aggregation request, not another500Kdecode result. See [separate follow-up measurements](agent8-followup-b12.json). All phases retain ON/max and unchanged B12 serving settings.
