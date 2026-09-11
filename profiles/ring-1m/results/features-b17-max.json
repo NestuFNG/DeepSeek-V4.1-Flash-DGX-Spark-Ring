@@ -1,0 +1,88 @@
+{
+  "measurement_date": "2026-09-11 Asia/Shanghai",
+  "boot": 17,
+  "prefill_chunk_tokens": 1536,
+  "complete": true,
+  "passed": true,
+  "scope": "Synthetic image and tool protocol checks, every request ON/max with nonempty reasoning. No external service called.",
+  "tests": [
+    {
+      "name": "images-2",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 3.0893664509931114,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 425,
+      "output_tokens": 93,
+      "reasoning_tokens": 85
+    },
+    {
+      "name": "images-4",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 3.3413741950062104,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 797,
+      "output_tokens": 134,
+      "reasoning_tokens": 120
+    },
+    {
+      "name": "image-grid",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 2.17282058300043,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 243,
+      "output_tokens": 71,
+      "reasoning_tokens": 59
+    },
+    {
+      "name": "parallel-tools",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 2.0229207210068125,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 324,
+      "output_tokens": 101,
+      "reasoning_tokens": 32
+    },
+    {
+      "name": "parallel-tools-roundtrip",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.680340281003737,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 496,
+      "output_tokens": 64,
+      "reasoning_tokens": 50
+    },
+    {
+      "name": "forced-named-tool",
+      "thinking_requested": true,
+      "reasoning_effort": "max",
+      "output_allowance": 65536,
+      "finish_reason": "stop",
+      "elapsed_seconds": 1.8557237140048528,
+      "nonempty_reasoning": true,
+      "passed": true,
+      "input_tokens": 359,
+      "output_tokens": 56,
+      "reasoning_tokens": 17
+    }
+  ]
+}
